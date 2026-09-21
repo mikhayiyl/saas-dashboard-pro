@@ -8,6 +8,9 @@ import {
 import StatCard from "@/components/dashboard/StatCard";
 import RevenueChart from "@/components/dashboard/RevenueChart";
 import CategoryChart from "@/components/dashboard/CategoryChart";
+import ProductPerformance from "@/components/dashboard/ProductPerformance";
+import AIInsights from "@/components/dashboard/AIInsights";
+import LiveActivity from "@/components/dashboard/LiveActivity";
 
 const stats = [
   {
@@ -54,19 +57,22 @@ function Dashboard() {
           Sep 1 – Sep 30
         </button>
       </div>
-
       {/* Stats */}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {stats.map((stat) => (
           <StatCard key={stat.title} {...stat} />
         ))}
       </div>
-
       {/* Analytics */}
-      <div className="grid gap-6 xl:grid-cols-[2fr_1fr]">
+      <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
         <RevenueChart />
         <CategoryChart />
       </div>
+      <div className="grid min-w-0 gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+        <ProductPerformance />
+        <AIInsights />
+      </div>
+      <LiveActivity />
     </div>
   );
 }
