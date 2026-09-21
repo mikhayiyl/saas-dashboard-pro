@@ -1,16 +1,26 @@
-import { Bell, Search } from "lucide-react";
+import { Bell, Menu, Search } from "lucide-react";
 
-function Navbar() {
+type NavbarProps = {
+  onMenuClick: () => void;
+};
+
+function Navbar({ onMenuClick }: NavbarProps) {
   return (
     <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b border-white/10 bg-[#08090A]/80 px-6 backdrop-blur">
+      <button
+        onClick={onMenuClick}
+        className="rounded-lg p-2 text-white/60 transition hover:bg-white/5 hover:text-white md:hidden"
+        aria-label="Open navigation"
+      >
+        <Menu className="size-5" />
+      </button>
       {/* Search */}
       <div className="flex items-center gap-3 text-white/40">
         <Search className="size-4" />
-
         <input
           type="text"
           placeholder="Search..."
-          className="w-64 bg-transparent text-sm text-white outline-none placeholder:text-white/30"
+          className="w-40 sm:w-64 bg-transparent text-sm text-white outline-none placeholder:text-white/30"
         />
       </div>
 
