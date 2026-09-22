@@ -34,7 +34,7 @@ const products: Product[] = [
 
 function ProductPerformance() {
   return (
-    <div className="rounded-xl border border-white/[0.08] bg-[#0C0D0F] p-4">
+    <div className="rounded-xl border border-white/8 bg-[#0C0D0F] p-4">
       {/* Header */}
       <div className="mb-4">
         <h2 className="text-base font-semibold tracking-tight text-white">
@@ -50,7 +50,7 @@ function ProductPerformance() {
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-white/[0.08] text-left text-xs text-white/40">
+            <tr className="border-b border-white/8 text-left text-xs text-white/40">
               <th className="pb-3 font-medium">Product</th>
               <th className="pb-3 font-medium">Orders</th>
               <th className="pb-3 font-medium">Revenue</th>
@@ -65,7 +65,7 @@ function ProductPerformance() {
               return (
                 <tr
                   key={product.name}
-                  className="border-b border-white/5 transition-colors last:border-0 hover:bg-white/[0.02]"
+                  className="border-b border-white/5 transition-colors last:border-0 hover:bg-white/2"
                 >
                   <td className="py-3 font-medium text-white">
                     {product.name}
