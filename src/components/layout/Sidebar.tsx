@@ -1,6 +1,7 @@
 import {
   BarChart3,
   LayoutDashboard,
+  LogOut,
   Package,
   Settings,
   ShoppingCart,
@@ -8,6 +9,7 @@ import {
   Users,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
+import { logoutUser } from "../../services/authService";
 
 type SidebarProps = {
   open: boolean;
@@ -51,6 +53,14 @@ const analyticsNavigation = [
 ];
 
 function Sidebar({ open, onClose }: SidebarProps) {
+  async function handleLogout() {
+    try {
+      await logoutUser();
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  }
+
   return (
     <>
       {/* Mobile overlay */}
@@ -107,12 +117,20 @@ function Sidebar({ open, onClose }: SidebarProps) {
                 D
               </div>
 
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium">Dancan</p>
-
                 <p className="truncate text-xs text-white/40">Administrator</p>
               </div>
             </div>
+
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="mt-2 flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-white/50 transition hover:bg-red-400/10 hover:text-red-400"
+            >
+              <LogOut className="size-4" />
+              Sign out
+            </button>
           </div>
         </div>
       </aside>
