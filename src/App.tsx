@@ -9,6 +9,7 @@ import Reports from "./pages/Reports";
 import AIInsights from "./pages/AIInsights";
 import Settings from "./pages/Settings";
 import Register from "./pages/Register";
+import Login from "./pages/Login";
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
       </Route>
 
       <Route path="/register" element={<Register />} />
+      <Route path="/login" element={<Login />} />
 
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
