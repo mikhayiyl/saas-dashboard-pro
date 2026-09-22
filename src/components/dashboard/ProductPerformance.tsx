@@ -34,19 +34,23 @@ const products: Product[] = [
 
 function ProductPerformance() {
   return (
-    <div className="rounded-xl border border-white/10 bg-[#0C0D0F] p-5">
-      <div className="mb-6">
-        <h2 className="font-semibold">Product Performance</h2>
+    <div className="rounded-xl border border-white/[0.08] bg-[#0C0D0F] p-4">
+      {/* Header */}
+      <div className="mb-4">
+        <h2 className="text-base font-semibold tracking-tight text-white">
+          Product Performance
+        </h2>
 
-        <p className="mt-1 text-sm text-white/40">
+        <p className="mt-1 text-xs text-white/40">
           Top performing products this month
         </p>
       </div>
 
+      {/* Table */}
       <div className="overflow-x-auto">
-        <table className="w-full  text-sm">
+        <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-white/10 text-left text-white/40">
+            <tr className="border-b border-white/[0.08] text-left text-xs text-white/40">
               <th className="pb-3 font-medium">Product</th>
               <th className="pb-3 font-medium">Orders</th>
               <th className="pb-3 font-medium">Revenue</th>
@@ -61,24 +65,36 @@ function ProductPerformance() {
               return (
                 <tr
                   key={product.name}
-                  className="border-b border-white/5 last:border-0"
+                  className="border-b border-white/5 transition-colors last:border-0 hover:bg-white/[0.02]"
                 >
-                  <td className="py-4 font-medium">{product.name}</td>
+                  <td className="py-3 font-medium text-white">
+                    {product.name}
+                  </td>
 
-                  <td className="py-4 text-white/60">{product.orders}</td>
+                  <td className="py-3 text-white/60">{product.orders}</td>
 
-                  <td className="py-4 text-white/60">{product.revenue}</td>
+                  <td className="py-3 font-medium text-white/80">
+                    {product.revenue}
+                  </td>
 
-                  <td className="py-4 text-right">
-                    <span
-                      className={
-                        isLowStock ? "text-red-400" : "text-emerald-400"
-                      }
-                    >
-                      {isLowStock ? "Low" : "Good"}
-                    </span>
+                  <td className="py-3 text-right">
+                    <div className="inline-flex items-center gap-2">
+                      <span
+                        className={`size-1.5 rounded-full ${
+                          isLowStock ? "bg-red-400" : "bg-emerald-400"
+                        }`}
+                      />
 
-                    <span className="ml-2 text-white/30">{product.stock}</span>
+                      <span
+                        className={
+                          isLowStock ? "text-red-400" : "text-emerald-400"
+                        }
+                      >
+                        {isLowStock ? "Low" : "Good"}
+                      </span>
+
+                      <span className="text-white/30">{product.stock}</span>
+                    </div>
                   </td>
                 </tr>
               );

@@ -18,18 +18,21 @@ const stats = [
     value: "$84,250",
     change: "+12.5%",
     icon: CircleDollarSign,
+    color: "#10B981", // emerald
   },
   {
     title: "Total Orders",
     value: "1,284",
     change: "+8.2%",
     icon: ShoppingCart,
+    color: "#0EA5E9", // cyan
   },
   {
     title: "Customers",
     value: "3,842",
     change: "+5.4%",
     icon: Users,
+    color: "#8B5CF6", // violet
   },
   {
     title: "Low Stock",
@@ -37,18 +40,20 @@ const stats = [
     change: "Attention",
     icon: CircleAlert,
     positive: false,
+    color: "#F59E0B", // amber
   },
 ];
 
 function Dashboard() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
-
-          <p className="mt-1 text-sm text-white/50">
+          <h1 className="text-2xl font-bold tracking-tight text-white">
+            Dashboard
+          </h1>
+          <p className="mt-1 text-sm text-white/60 italic">
             Here's what's happening with your business today.
           </p>
         </div>
@@ -57,21 +62,26 @@ function Dashboard() {
           Sep 1 – Sep 30
         </button>
       </div>
+
       {/* Stats */}
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
         {stats.map((stat) => (
           <StatCard key={stat.title} {...stat} />
         ))}
       </div>
+
       {/* Analytics */}
-      <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
+
+      <div className="grid gap-6 lg:grid-cols-2">
         <RevenueChart />
         <CategoryChart />
       </div>
+
       <div className="grid min-w-0 gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         <ProductPerformance />
         <AIInsights />
       </div>
+
       <LiveActivity />
     </div>
   );

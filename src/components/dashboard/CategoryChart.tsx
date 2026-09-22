@@ -1,28 +1,26 @@
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 
 const data = [
-  { name: "Electronics", value: 42 },
-  { name: "Clothing", value: 28 },
-  { name: "Home & Office", value: 18 },
-  { name: "Other", value: 12 },
-];
-
-const COLORS = [
-  "#ffffff",
-  "rgba(255,255,255,0.65)",
-  "rgba(255,255,255,0.4)",
-  "rgba(255,255,255,0.2)",
+  { name: "Electronics", value: 42, color: "#38BDF8" },
+  { name: "Clothing", value: 28, color: "#8B5CF6" },
+  { name: "Home & Office", value: 18, color: "#F59E0B" },
+  { name: "Other", value: 12, color: "#10B981" },
 ];
 
 function CategoryChart() {
   return (
-    <div className="rounded-xl border border-white/10 bg-[#0C0D0F] p-5">
-      <div className="mb-6">
-        <h2 className="font-semibold">Sales by Category</h2>
-        <p className="mt-1 text-sm text-white/40">Revenue distribution</p>
+    <div className="rounded-xl border border-white/8 bg-[#0C0D0F] p-4">
+      {/* Header */}
+      <div className="mb-4">
+        <h2 className="text-base font-semibold tracking-tight text-white">
+          Sales by Category
+        </h2>
+
+        <p className="mt-1 text-xs text-white/40">Revenue distribution</p>
       </div>
 
-      <div className="h-80">
+      {/* Donut */}
+      <div className="h-55">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
@@ -31,43 +29,54 @@ function CategoryChart() {
               nameKey="name"
               cx="50%"
               cy="45%"
-              innerRadius={70}
-              outerRadius={105}
+              innerRadius={50}
+              outerRadius={100}
               paddingAngle={3}
+              stroke="none"
             >
-              {data.map((entry, index) => (
-                <Cell key={entry.name} fill={COLORS[index]} />
+              {data.map((item) => (
+                <Cell key={item.name} fill={item.color} />
               ))}
             </Pie>
 
             <Tooltip
+              cursor={false}
               contentStyle={{
                 backgroundColor: "#151619",
                 border: "1px solid rgba(255,255,255,0.1)",
                 borderRadius: "8px",
+                padding: "8px 10px",
+                fontSize: "12px",
+                boxShadow: "0 10px 30px rgba(0,0,0,0.35)",
               }}
-              formatter={(value) => `${value}%`}
+              labelStyle={{
+                color: "rgba(255,255,255,0.5)",
+                marginBottom: "4px",
+              }}
+              formatter={(value) => [`${value}%`, "Revenue"]}
             />
           </PieChart>
         </ResponsiveContainer>
       </div>
 
-      <div className="space-y-3">
-        {data.map((item, index) => (
-          <div
-            key={item.name}
-            className="flex items-center justify-between text-sm"
-          >
-            <div className="flex items-center gap-2">
+      {/* Category breakdown */}
+      <div className="mt-1 grid grid-cols-1 gap-x-6 gap-y-3">
+        {data.map((item) => (
+          <div key={item.name} className="flex items-center ">
+            <div className="flex min-w-0 items-center gap-2">
               <span
-                className="size-2 rounded-full"
-                style={{ backgroundColor: COLORS[index] }}
+                className="size-2 shrink-0 rounded-full"
+                style={{ backgroundColor: item.color }}
               />
 
-              <span className="text-white/60">{item.name}</span>
+              <span className="truncate text-xs text-white/55">
+                {item.name}
+              </span>
             </div>
 
-            <span className="font-medium">{item.value}%</span>
+            <span className="ml-3 text-xs font-semibold text-white/85">
+              {item.value}%
+            </span>
           </div>
         ))}
       </div>

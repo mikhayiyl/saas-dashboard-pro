@@ -24,8 +24,16 @@ function StatCard({
           <p className="mt-2 text-2xl font-semibold tracking-tight">{value}</p>
         </div>
 
-        <div className="flex size-10 items-center justify-center rounded-lg bg-white/5">
-          <Icon className="size-5 text-white/70" />
+        <div
+          className={`flex size-10 items-center justify-center rounded-lg ${
+            positive ? "bg-emerald-400/10" : "bg-red-400/10"
+          }`}
+        >
+          <Icon
+            className={`size-5 ${
+              positive ? "text-emerald-400" : "text-red-400"
+            }`}
+          />
         </div>
       </div>
 
