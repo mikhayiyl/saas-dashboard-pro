@@ -5,6 +5,7 @@ import {
 } from "firebase/auth";
 
 import { auth } from "../lib/Firebase";
+import { createUserProfile } from "./userService";
 
 export async function registerUser(email: string, password: string) {
   const userCredential = await createUserWithEmailAndPassword(
@@ -12,6 +13,13 @@ export async function registerUser(email: string, password: string) {
     email,
     password,
   );
+
+  await createUserProfile(userCredential.user.uid, {
+    name: "Dancan",
+    email,
+    role: "admin",
+    workspaceId: "demo-workspace",
+  });
 
   return userCredential.user;
 }
