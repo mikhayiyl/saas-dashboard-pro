@@ -8,6 +8,7 @@ import Customers from "./pages/Customers";
 import Reports from "./pages/Reports";
 import AIInsights from "./pages/AIInsights";
 import Settings from "./pages/Settings";
+import Register from "./pages/Register";
 
 function App() {
   return (
@@ -22,9 +23,10 @@ function App() {
         <Route path="/settings" element={<Settings />} />
       </Route>
 
+      <Route path="/register" element={<Register />} />
+
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   );
 }
-
 export default App;
