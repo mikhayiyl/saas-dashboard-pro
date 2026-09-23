@@ -4,8 +4,8 @@ import {
   signOut,
 } from "firebase/auth";
 
-import { auth } from "../lib/firebase";
 import { createUserProfile } from "./userService";
+import { auth } from "@/lib/firebase";
 
 export async function registerUser(email: string, password: string) {
   const userCredential = await createUserWithEmailAndPassword(

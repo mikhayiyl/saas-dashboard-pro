@@ -1,5 +1,5 @@
 import { get, increment, ref, update } from "firebase/database";
-
+import { createActivity } from "./activityService";
 import { db } from "../lib/firebase";
 import type { Order } from "../types/database";
 
@@ -144,6 +144,12 @@ export async function transitionOrderStatus(
   }
 
   await update(ref(db), updates);
+
+  await createActivity({
+    workspaceId,
+    type: "order",
+    message: `Order status changed from ${previousStatus} to ${newStatus}.`,
+  });
 }
 
 export async function deleteOrderWithBusinessLogic(
