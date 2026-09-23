@@ -1,19 +1,29 @@
-import { z } from "zod";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { productSchema } from "../../schemas/productSchema";
+import { z } from "zod";
 
-import { createProduct } from "../../services/productService";
-import { useState } from "react";
+import { productSchema } from "../../schemas/productSchema";
+import { createProduct, updateProduct } from "../../services/productService";
+
+import type { Product } from "../../types/database";
 
 type ProductFormProps = {
   workspaceId: string;
+  product?: Product;
   onSuccess: () => void;
   onCancel: () => void;
 };
 
-function ProductForm({ workspaceId, onSuccess, onCancel }: ProductFormProps) {
+function ProductForm({
+  workspaceId,
+  product,
+  onSuccess,
+  onCancel,
+}: ProductFormProps) {
   const [submitError, setSubmitError] = useState("");
+
+  const isEditMode = Boolean(product);
 
   const {
     register,
@@ -27,40 +37,81 @@ function ProductForm({ workspaceId, onSuccess, onCancel }: ProductFormProps) {
   >({
     resolver: zodResolver(productSchema),
     defaultValues: {
-      name: "",
-      category: "",
-      price: 0,
-      stock: 0,
+      name: product?.name ?? "",
+      category: product?.category ?? "",
+      price: product?.price ?? 0,
+      stock: product?.stock ?? 0,
     },
   });
+
+  useEffect(() => {
+    if (!product) {
+      reset({
+        name: "",
+        category: "",
+        price: 0,
+        stock: 0,
+      });
+
+      return;
+    }
+
+    reset({
+      name: product.name,
+      category: product.category,
+      price: product.price,
+      stock: product.stock,
+    });
+  }, [product, reset]);
+
   async function onSubmit(data: z.output<typeof productSchema>) {
     try {
       setSubmitError("");
 
-      await createProduct({
-        workspaceId,
-        name: data.name,
-        category: data.category,
-        price: data.price,
-        stock: data.stock,
-        orders: 0,
-        revenue: 0,
-      });
+      if (product) {
+        await updateProduct(workspaceId, product.id, {
+          name: data.name,
+          category: data.category,
+          price: data.price,
+          stock: data.stock,
+        });
+      } else {
+        await createProduct({
+          workspaceId,
+          name: data.name,
+          category: data.category,
+          price: data.price,
+          stock: data.stock,
+          orders: 0,
+          revenue: 0,
+        });
+      }
 
       reset();
       onSuccess();
     } catch (error) {
-      console.error("Failed to create product:", error);
-      setSubmitError("Failed to create product. Please try again.");
+      console.error(
+        `Failed to ${isEditMode ? "update" : "create"} product:`,
+        error,
+      );
+
+      setSubmitError(
+        `Failed to ${isEditMode ? "update" : "create"} product. Please try again.`,
+      );
     }
   }
 
   return (
     <div className="rounded-xl border border-white/10 bg-[#0C0D0F] p-6">
       <div className="mb-6">
-        <h2 className="text-lg font-semibold">Add Product</h2>
+        <h2 className="text-lg font-semibold">
+          {isEditMode ? "Edit Product" : "Add Product"}
+        </h2>
+
         <p className="mt-1 text-sm text-white/50">
-          Add a new product to your inventory.
+          {isEditMode
+            ? "Update the product information below."
+            : "Add a new product to your inventory."}
         </p>
       </div>
 
@@ -173,7 +224,13 @@ function ProductForm({ workspaceId, onSuccess, onCancel }: ProductFormProps) {
             disabled={isSubmitting}
             className="rounded-lg bg-white px-4 py-2.5 text-sm font-medium text-black transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {isSubmitting ? "Adding..." : "Add Product"}
+            {isSubmitting
+              ? isEditMode
+                ? "Saving..."
+                : "Adding..."
+              : isEditMode
+                ? "Save Changes"
+                : "Add Product"}
           </button>
         </div>
       </form>

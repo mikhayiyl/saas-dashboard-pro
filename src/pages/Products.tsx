@@ -14,6 +14,7 @@ function Products() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [workspaceId, setWorkspaceId] = useState<string | null>(null);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
   useEffect(() => {
     if (!user) {
@@ -79,7 +80,10 @@ function Products() {
         {!showForm && (
           <button
             type="button"
-            onClick={() => setShowForm(true)}
+            onClick={() => {
+              setEditingProduct(null);
+              setShowForm(true);
+            }}
             className="rounded-lg bg-white px-4 py-2.5 text-sm font-medium text-black transition hover:bg-white/90"
           >
             Add Product
@@ -90,8 +94,15 @@ function Products() {
       {showForm && workspaceId && (
         <ProductForm
           workspaceId={workspaceId}
-          onSuccess={() => setShowForm(false)}
-          onCancel={() => setShowForm(false)}
+          product={editingProduct ?? undefined}
+          onSuccess={() => {
+            setShowForm(false);
+            setEditingProduct(null);
+          }}
+          onCancel={() => {
+            setShowForm(false);
+            setEditingProduct(null);
+          }}
         />
       )}
 
@@ -108,6 +119,7 @@ function Products() {
                 <th className="px-6 py-4 font-medium">Stock</th>
                 <th className="px-6 py-4 font-medium">Orders</th>
                 <th className="px-6 py-4 font-medium">Revenue</th>
+                <th className="px-4 py-3 text-right">Actions</th>
               </tr>
             </thead>
 
@@ -143,6 +155,19 @@ function Products() {
 
                   <td className="px-6 py-4 font-medium">
                     ${product.revenue.toLocaleString()}
+                  </td>
+
+                  <td className="px-4 py-3 text-right">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingProduct(product);
+                        setShowForm(true);
+                      }}
+                      className="text-sm font-medium text-white/60 transition hover:text-white"
+                    >
+                      Edit
+                    </button>
                   </td>
                 </tr>
               ))}
