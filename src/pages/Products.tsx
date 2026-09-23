@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 
 import { useAuth } from "../context/AuthContext";
-import { subscribeToProducts } from "../services/productService";
+import { deleteProduct, subscribeToProducts } from "../services/productService";
 import { getUserProfile } from "../services/userService";
 import ProductForm from "../components/products/ProductForm";
 
 import type { Product } from "../types/database";
+import ConfirmDeleteModal from "@/components/common/ConfirmDeleteModal";
 
 function Products() {
   const { user } = useAuth();
@@ -15,6 +16,10 @@ function Products() {
   const [showForm, setShowForm] = useState(false);
   const [workspaceId, setWorkspaceId] = useState<string | null>(null);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [deletingProductId, setDeletingProductId] = useState<string | null>(
+    null,
+  );
+  const [productToDelete, setProductToDelete] = useState<Product | null>(null);
 
   useEffect(() => {
     if (!user) {
@@ -51,6 +56,24 @@ function Products() {
       unsubscribe?.();
     };
   }, [user]);
+
+  async function handleDeleteProduct() {
+    if (!workspaceId || !productToDelete) {
+      return;
+    }
+
+    try {
+      setDeletingProductId(productToDelete.id);
+
+      await deleteProduct(workspaceId, productToDelete.id);
+
+      setProductToDelete(null);
+    } catch (error) {
+      console.error("Failed to delete product:", error);
+    } finally {
+      setDeletingProductId(null);
+    }
+  }
 
   if (loading) {
     return (
@@ -156,18 +179,30 @@ function Products() {
                   <td className="px-6 py-4 font-medium">
                     ${product.revenue.toLocaleString()}
                   </td>
-
                   <td className="px-4 py-3 text-right">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setEditingProduct(product);
-                        setShowForm(true);
-                      }}
-                      className="text-sm font-medium text-white/60 transition hover:text-white"
-                    >
-                      Edit
-                    </button>
+                    <div className="flex justify-end gap-4">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingProduct(product);
+                          setShowForm(true);
+                        }}
+                        className="text-sm font-medium text-white/60 transition hover:text-white"
+                      >
+                        Edit
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setProductToDelete(product)}
+                        disabled={deletingProductId === product.id}
+                        className="text-sm font-medium text-red-400 transition hover:text-red-300 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        {deletingProductId === product.id
+                          ? "Deleting..."
+                          : "Delete"}
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -175,6 +210,14 @@ function Products() {
           </table>
         </div>
       </div>
+      <ConfirmDeleteModal
+        open={Boolean(productToDelete)}
+        itemName={productToDelete?.name ?? ""}
+        itemType="product"
+        isDeleting={deletingProductId !== null}
+        onConfirm={handleDeleteProduct}
+        onCancel={() => setProductToDelete(null)}
+      />
     </div>
   );
 }

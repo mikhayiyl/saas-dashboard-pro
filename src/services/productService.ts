@@ -1,4 +1,4 @@
-import { onValue, push, ref, set, update } from "firebase/database";
+import { onValue, push, ref, remove, set, update } from "firebase/database";
 
 import { db } from "../lib/Firebase";
 
@@ -40,6 +40,12 @@ export async function updateProduct(
     ...data,
     updatedAt: Date.now(),
   });
+}
+
+export async function deleteProduct(workspaceId: string, productId: string) {
+  const productRef = ref(db, `workspaces/${workspaceId}/products/${productId}`);
+
+  await remove(productRef);
 }
 
 export function subscribeToProducts(
