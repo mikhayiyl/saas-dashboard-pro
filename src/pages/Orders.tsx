@@ -8,11 +8,12 @@ import {
 
 import { useAuth } from "../context/AuthContext";
 import { getUserProfile } from "../services/userService";
+
+import { subscribeToOrders } from "../services/orderService";
 import {
-  deleteOrder,
-  subscribeToOrders,
-  updateOrder,
-} from "../services/orderService";
+  deleteOrderWithBusinessLogic,
+  transitionOrderStatus,
+} from "../services/orderBusinessService";
 import { subscribeToCustomers } from "../services/customerService";
 import { subscribeToProducts } from "../services/productService";
 
@@ -92,9 +93,7 @@ function Orders() {
     if (!workspaceId) return;
 
     try {
-      await updateOrder(workspaceId, orderId, {
-        status,
-      });
+      await transitionOrderStatus(workspaceId, orderId, status);
     } catch (error) {
       console.error("Failed to update order status:", error);
     }
@@ -106,7 +105,7 @@ function Orders() {
     try {
       setIsDeleting(true);
 
-      await deleteOrder(workspaceId, orderToDelete.id);
+      await deleteOrderWithBusinessLogic(workspaceId, orderToDelete);
 
       setOrderToDelete(null);
     } catch (error) {
@@ -115,7 +114,6 @@ function Orders() {
       setIsDeleting(false);
     }
   }
-
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
