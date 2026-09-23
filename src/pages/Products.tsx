@@ -1,5 +1,130 @@
+import { useEffect, useState } from "react";
+
+import { useAuth } from "../context/AuthContext";
+import { subscribeToProducts } from "../services/productService";
+import { getUserProfile } from "../services/userService";
+
+import type { Product } from "../types/database";
+
 function Products() {
-  return <h1 className="text-2xl font-semibold">Products</h1>;
+  const { user } = useAuth();
+
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!user) {
+      return;
+    }
+
+    const uid = user.uid;
+
+    let unsubscribe: (() => void) | undefined;
+
+    async function loadProducts() {
+      try {
+        const profile = await getUserProfile(uid);
+
+        if (!profile) {
+          throw new Error("User profile not found.");
+        }
+
+        unsubscribe = subscribeToProducts(profile.workspaceId, (data) => {
+          setProducts(data);
+          setLoading(false);
+        });
+      } catch (error) {
+        console.error("Failed to load products:", error);
+        setLoading(false);
+      }
+    }
+
+    loadProducts();
+
+    return () => {
+      unsubscribe?.();
+    };
+  }, [user]);
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-2xl font-semibold">Products</h1>
+          <p className="mt-1 text-sm text-white/50">
+            Manage your products and inventory.
+          </p>
+        </div>
+
+        <p className="text-sm text-white/50">Loading products...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-semibold">Products</h1>
+        <p className="mt-1 text-sm text-white/50">
+          Manage your products and inventory.
+        </p>
+      </div>
+
+      <div className="overflow-hidden rounded-xl border border-white/10 bg-[#0C0D0F]">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left">
+            <thead className="border-b border-white/10">
+              <tr className="text-xs uppercase tracking-wider text-white/40">
+                <th className="px-6 py-4 font-medium">Product</th>
+                <th className="px-6 py-4 font-medium">Category</th>
+                <th className="px-6 py-4 font-medium">Price</th>
+                <th className="px-6 py-4 font-medium">Stock</th>
+                <th className="px-6 py-4 font-medium">Orders</th>
+                <th className="px-6 py-4 font-medium">Revenue</th>
+              </tr>
+            </thead>
+
+            <tbody className="divide-y divide-white/5">
+              {products.map((product) => (
+                <tr
+                  key={product.id}
+                  className="text-sm transition hover:bg-white/2"
+                >
+                  <td className="px-6 py-4 font-medium">{product.name}</td>
+
+                  <td className="px-6 py-4 text-white/60">
+                    {product.category}
+                  </td>
+
+                  <td className="px-6 py-4">
+                    ${product.price.toLocaleString()}
+                  </td>
+
+                  <td className="px-6 py-4">
+                    <span
+                      className={
+                        product.stock < 30 ? "text-amber-400" : "text-white/70"
+                      }
+                    >
+                      {product.stock}
+                    </span>
+                  </td>
+
+                  <td className="px-6 py-4 text-white/70">
+                    {product.orders.toLocaleString()}
+                  </td>
+
+                  <td className="px-6 py-4 font-medium">
+                    ${product.revenue.toLocaleString()}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default Products;
