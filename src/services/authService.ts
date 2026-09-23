@@ -4,7 +4,7 @@ import {
   signOut,
 } from "firebase/auth";
 
-import { auth } from "../lib/Firebase";
+import { auth } from "../lib/firebase";
 import { createUserProfile } from "./userService";
 
 export async function registerUser(email: string, password: string) {

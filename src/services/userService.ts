@@ -1,5 +1,5 @@
 import { get, ref, set } from "firebase/database";
-import { db } from "../lib/Firebase";
+import { db } from "../lib/firebase";
 
 import type { UserProfile } from "../types/database";
 
