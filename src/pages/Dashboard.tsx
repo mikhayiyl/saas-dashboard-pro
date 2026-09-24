@@ -13,21 +13,23 @@ import AIInsights from "@/components/dashboard/AIInsights";
 import LiveActivity from "@/components/dashboard/LiveActivity";
 import {
   subscribeToDashboardData,
+  type DashboardDateRange,
   type DashboardMetrics,
 } from "@/services/dashboardService";
+
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { getUserProfile } from "@/services/userService";
 
 function Dashboard() {
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
+  const [dateRange, setDateRange] = useState<DashboardDateRange>("all");
   const { user } = useAuth();
 
   useEffect(() => {
     if (!user) return;
 
     const uid = user.uid;
-
     let unsubscribe: (() => void) | undefined;
 
     async function loadDashboard() {
@@ -43,6 +45,7 @@ function Dashboard() {
           (__, metrics) => {
             setMetrics(metrics);
           },
+          dateRange,
         );
       } catch (error) {
         console.error("Failed to load dashboard:", error);
@@ -54,8 +57,7 @@ function Dashboard() {
     return () => {
       unsubscribe?.();
     };
-  }, [user]);
-
+  }, [user, dateRange]);
   const stats = [
     {
       title: "Total Revenue",
@@ -91,19 +93,27 @@ function Dashboard() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">
-            Dashboard
-          </h1>
-          <p className="mt-1 text-sm text-white/60 italic">
-            Here's what's happening with your business today.
+          <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
+          <p className="mt-1 text-sm text-white/40">
+            Overview of your business performance
           </p>
         </div>
 
-        <button className="rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium transition hover:bg-white/10">
-          Sep 1 – Sep 30
-        </button>
+        <select
+          value={dateRange}
+          onChange={(event) =>
+            setDateRange(event.target.value as DashboardDateRange)
+          }
+          className="rounded-lg border border-white/10 bg-[#0C0D0F] px-3 py-2 text-sm text-white outline-none transition focus:border-white/20"
+        >
+          <option value="7d">Last 7 days</option>
+          <option value="30d">Last 30 days</option>
+          <option value="this-year">This year</option>
+          <option value="all">All time</option>
+        </select>
       </div>
 
       {/* Stats */}

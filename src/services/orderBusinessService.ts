@@ -2,6 +2,7 @@ import { get, increment, ref, update } from "firebase/database";
 import { createActivity } from "./activityService";
 import { db } from "../lib/Firebase";
 import type { Order } from "../types/database";
+import { createNotification } from "./notificationService";
 
 function buildCompletedOrderUpdates(
   workspaceId: string,
@@ -149,6 +150,19 @@ export async function transitionOrderStatus(
     workspaceId,
     type: "order",
     message: `Order status changed from ${previousStatus} to ${newStatus}.`,
+  });
+
+  await createNotification({
+    workspaceId,
+    title: "Order updated",
+    message: `Order status changed from ${previousStatus} to ${newStatus}.`,
+    type:
+      newStatus === "completed"
+        ? "success"
+        : newStatus === "cancelled"
+          ? "warning"
+          : "info",
+    read: false,
   });
 }
 

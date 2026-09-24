@@ -9,9 +9,12 @@ type DashboardData = {
   orders: Order[];
 };
 
+export type DashboardDateRange = "7d" | "30d" | "this-year" | "all";
+
 export function subscribeToDashboardData(
   workspaceId: string,
   callback: (data: DashboardData, metrics: DashboardMetrics) => void,
+  dateRange: DashboardDateRange = "all",
 ) {
   const productsRef = ref(db, `workspaces/${workspaceId}/products`);
 
@@ -30,7 +33,7 @@ export function subscribeToDashboardData(
       orders,
     };
 
-    callback(data, calculateDashboardMetrics(data));
+    callback(data, calculateDashboardMetrics(data, dateRange));
   };
 
   const unsubscribeProducts = onValue(productsRef, (snapshot) => {
@@ -113,6 +116,7 @@ export type DashboardMetrics = {
 
 export function calculateDashboardMetrics(
   data: DashboardData,
+  dateRange: DashboardDateRange = "all",
 ): DashboardMetrics {
   const { products, customers, orders } = data;
 
@@ -120,13 +124,41 @@ export function calculateDashboardMetrics(
     (order) => order.status === "completed",
   );
 
-  const totalRevenue = completedOrders.reduce(
+  const now = new Date();
+
+  const startDate = new Date(now);
+
+  switch (dateRange) {
+    case "7d":
+      startDate.setDate(now.getDate() - 7);
+      break;
+
+    case "30d":
+      startDate.setDate(now.getDate() - 30);
+      break;
+
+    case "this-year":
+      startDate.setMonth(0, 1);
+      startDate.setHours(0, 0, 0, 0);
+      break;
+
+    case "all":
+      break;
+  }
+
+  const filteredOrders =
+    dateRange === "all"
+      ? completedOrders
+      : completedOrders.filter(
+          (order) => order.createdAt >= startDate.getTime(),
+        );
+
+  const totalRevenue = filteredOrders.reduce(
     (sum, order) => sum + order.total,
     0,
   );
 
-  const totalOrders = completedOrders.length;
-
+  const totalOrders = filteredOrders.length;
   const totalCustomers = customers.length;
 
   const lowStockCount = products.filter(
@@ -142,7 +174,7 @@ export function calculateDashboardMetrics(
     }
   >();
 
-  for (const order of completedOrders) {
+  for (const order of filteredOrders) {
     const date = new Date(order.createdAt);
 
     const monthKey = `${date.getFullYear()}-${String(
@@ -173,7 +205,7 @@ export function calculateDashboardMetrics(
 
   const salesByCategoryMap = new Map<string, number>();
 
-  for (const order of completedOrders) {
+  for (const order of filteredOrders) {
     for (const item of order.items) {
       const product = products.find((product) => product.id === item.productId);
 
