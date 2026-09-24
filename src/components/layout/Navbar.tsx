@@ -179,10 +179,12 @@ function Navbar({ onMenuClick }: NavbarProps) {
         </div>
         <div className="flex items-center gap-3">
           <div className="flex size-8 items-center justify-center rounded-full bg-white/10 text-xs font-medium">
-            D
+            {user?.displayName?.charAt(0).toUpperCase()}
           </div>
 
-          <span className="text-sm font-medium">Dancan</span>
+          <span className="text-sm font-medium">
+            {user?.displayName || "User"}
+          </span>
         </div>
       </div>
     </header>
