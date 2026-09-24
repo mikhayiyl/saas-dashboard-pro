@@ -1,6 +1,6 @@
 import { get, increment, ref, update } from "firebase/database";
 import { createActivity } from "./activityService";
-import { db } from "../lib/firebase";
+import { db } from "../lib/Firebase";
 import type { Order } from "../types/database";
 
 function buildCompletedOrderUpdates(

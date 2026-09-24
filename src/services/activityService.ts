@@ -1,6 +1,6 @@
 import { onValue, push, ref, set } from "firebase/database";
 
-import { db } from "../lib/firebase";
+import { db } from "../lib/Firebase";
 import type { Activity } from "../types/database";
 
 type CreateActivityData = Omit<Activity, "id" | "timestamp">;

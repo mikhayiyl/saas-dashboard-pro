@@ -8,7 +8,7 @@ import {
   update,
 } from "firebase/database";
 
-import { db } from "../lib/firebase";
+import { db } from "../lib/Firebase";
 import type { Customer } from "../types/database";
 
 type CreateCustomerData = Omit<

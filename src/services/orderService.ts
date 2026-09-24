@@ -8,7 +8,7 @@ import {
   get,
 } from "firebase/database";
 
-import { db } from "../lib/firebase";
+import { db } from "../lib/Firebase";
 import type { Order } from "../types/database";
 
 type CreateOrderData = Omit<Order, "id" | "createdAt">;

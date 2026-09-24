@@ -1,6 +1,6 @@
 import { onValue, push, ref, remove, set, update } from "firebase/database";
 
-import { db } from "../lib/firebase";
+import { db } from "../lib/Firebase";
 
 import type { Product } from "../types/database";
 

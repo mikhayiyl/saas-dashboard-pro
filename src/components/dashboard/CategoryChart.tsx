@@ -1,13 +1,38 @@
-import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
+import {
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Sector,
+  Tooltip,
+  type PieSectorShapeProps,
+} from "recharts";
 
-const data = [
-  { name: "Electronics", value: 42, color: "#38BDF8" },
-  { name: "Clothing", value: 28, color: "#8B5CF6" },
-  { name: "Home & Office", value: 18, color: "#F59E0B" },
-  { name: "Other", value: 12, color: "#10B981" },
-];
+type CategoryChartProps = {
+  data: {
+    category: string;
+    revenue: number;
+  }[];
+};
 
-function CategoryChart() {
+const categoryColors = ["#8B5CF6", "#0EA5E9", "#10B981", "#F59E0B", "#F43F5E"];
+
+function CategoryChart({ data }: CategoryChartProps) {
+  const totalRevenue = data.reduce((sum, item) => sum + item.revenue, 0);
+
+  const chartData = data.map((item) => ({
+    ...item,
+    percentage:
+      totalRevenue > 0 ? Math.round((item.revenue / totalRevenue) * 100) : 0,
+  }));
+
+  const renderShape = (props: PieSectorShapeProps) => {
+    const { index = 0 } = props;
+
+    return (
+      <Sector {...props} fill={categoryColors[index % categoryColors.length]} />
+    );
+  };
+
   return (
     <div className="rounded-xl border border-white/8 bg-[#0C0D0F] p-4">
       {/* Header */}
@@ -24,20 +49,17 @@ function CategoryChart() {
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
-              data={data}
-              dataKey="value"
-              nameKey="name"
+              data={chartData}
+              dataKey="revenue"
+              nameKey="category"
               cx="50%"
               cy="45%"
               innerRadius={50}
-              outerRadius={100}
+              outerRadius={90}
               paddingAngle={3}
               stroke="none"
-            >
-              {data.map((item) => (
-                <Cell key={item.name} fill={item.color} />
-              ))}
-            </Pie>
+              shape={renderShape}
+            />
 
             <Tooltip
               cursor={false}
@@ -49,11 +71,10 @@ function CategoryChart() {
                 fontSize: "12px",
                 boxShadow: "0 10px 30px rgba(0,0,0,0.35)",
               }}
-              labelStyle={{
-                color: "rgba(255,255,255,0.5)",
-                marginBottom: "4px",
-              }}
-              formatter={(value) => [`${value}%`, "Revenue"]}
+              formatter={(value) => [
+                `$${Number(value).toLocaleString()}`,
+                "Revenue",
+              ]}
             />
           </PieChart>
         </ResponsiveContainer>
@@ -61,21 +82,27 @@ function CategoryChart() {
 
       {/* Category breakdown */}
       <div className="mt-1 grid grid-cols-1 gap-x-6 gap-y-3">
-        {data.map((item) => (
-          <div key={item.name} className="flex items-center ">
+        {chartData.map((item, index) => (
+          <div
+            key={item.category}
+            className="flex items-center justify-between"
+          >
             <div className="flex min-w-0 items-center gap-2">
               <span
                 className="size-2 shrink-0 rounded-full"
-                style={{ backgroundColor: item.color }}
+                style={{
+                  backgroundColor:
+                    categoryColors[index % categoryColors.length],
+                }}
               />
 
               <span className="truncate text-xs text-white/55">
-                {item.name}
+                {item.category}
               </span>
             </div>
 
             <span className="ml-3 text-xs font-semibold text-white/85">
-              {item.value}%
+              {item.percentage}%
             </span>
           </div>
         ))}

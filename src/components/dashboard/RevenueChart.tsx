@@ -9,19 +9,15 @@ import {
   YAxis,
 } from "recharts";
 
-const data = [
-  { month: "Jan", revenue: 5200, orders: 120 },
-  { month: "Feb", revenue: 6800, orders: 145 },
-  { month: "Mar", revenue: 6100, orders: 132 },
-  { month: "Apr", revenue: 8200, orders: 168 },
-  { month: "May", revenue: 7600, orders: 155 },
-  { month: "Jun", revenue: 9100, orders: 190 },
-  { month: "Jul", revenue: 8400, orders: 178 },
-  { month: "Aug", revenue: 10200, orders: 214 },
-  { month: "Sep", revenue: 11800, orders: 238 },
-];
+type RevenueChartProps = {
+  data: {
+    month: string;
+    revenue: number;
+    orders: number;
+  }[];
+};
 
-function RevenueChart() {
+function RevenueChart({ data }: RevenueChartProps) {
   return (
     <div className="h-fit w-full rounded-xl border border-white/8 bg-[#0C0D0F] p-4">
       {/* Header */}
