@@ -132,7 +132,7 @@ function Dashboard() {
 
       <div className="grid min-w-0 gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         <ProductPerformance data={metrics?.productPerformance ?? []} />
-        <AIInsights />
+        <AIInsights metrics={metrics} />{" "}
       </div>
 
       <LiveActivity />

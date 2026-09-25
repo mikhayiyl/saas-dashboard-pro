@@ -1,28 +1,16 @@
 import { AlertTriangle, ArrowUpRight, Sparkles } from "lucide-react";
 
+import type { DashboardMetrics } from "@/services/dashboardService";
+
+type AIInsightsProps = {
+  metrics: DashboardMetrics | null;
+};
+
 type Insight = {
   type: "positive" | "warning" | "info";
   title: string;
   description: string;
 };
-
-const insights: Insight[] = [
-  {
-    type: "positive",
-    title: "Revenue is growing",
-    description: "Revenue increased by 12.5% compared with last month.",
-  },
-  {
-    type: "warning",
-    title: "Keyboard stock is low",
-    description: "Only 8 units remain. Consider restocking soon.",
-  },
-  {
-    type: "info",
-    title: "Strong product demand",
-    description: "Laptop and Monitor sales are driving this month's revenue.",
-  },
-];
 
 const insightIcons = {
   positive: ArrowUpRight,
@@ -30,13 +18,54 @@ const insightIcons = {
   info: Sparkles,
 };
 
-function AIInsights() {
+function generateInsights(metrics: DashboardMetrics): Insight[] {
+  const insights: Insight[] = [];
+
+  if (metrics.totalRevenue > 0) {
+    insights.push({
+      type: "positive",
+      title: "Revenue is active",
+      description: `Your business has generated $${metrics.totalRevenue.toLocaleString()} in revenue.`,
+    });
+  }
+
+  if (metrics.lowStockCount > 0) {
+    insights.push({
+      type: "warning",
+      title: "Low stock detected",
+      description: `${metrics.lowStockCount} product${
+        metrics.lowStockCount !== 1 ? "s" : ""
+      } need${metrics.lowStockCount === 1 ? "s" : ""} attention.`,
+    });
+  }
+
+  if (metrics.totalOrders > 0) {
+    insights.push({
+      type: "info",
+      title: "Orders are coming in",
+      description: `You have ${metrics.totalOrders.toLocaleString()} completed orders in the selected period.`,
+    });
+  }
+
+  return insights;
+}
+
+const AIInsights = ({ metrics }: AIInsightsProps) => {
+  if (!metrics) {
+    return (
+      <div className="rounded-xl border border-white/10 bg-[#0C0D0F] p-5">
+        <p className="text-sm text-white/40">Loading insights...</p>
+      </div>
+    );
+  }
+
+  const insights = generateInsights(metrics);
+
   return (
     <div className="rounded-xl border border-white/10 bg-[#0C0D0F] p-5">
       <div className="mb-6">
         <div className="flex items-center gap-2">
           <Sparkles className="size-4 text-white/70" />
-
           <h2 className="font-semibold">AI Insights</h2>
         </div>
 
@@ -73,6 +102,6 @@ function AIInsights() {
       </div>
     </div>
   );
-}
+};
 
 export default AIInsights;
