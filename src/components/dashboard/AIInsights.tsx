@@ -1,15 +1,12 @@
 import { AlertTriangle, ArrowUpRight, Sparkles } from "lucide-react";
+import { useEffect, useState } from "react";
 
+import { generateBusinessInsights } from "@/services/aiService";
 import type { DashboardMetrics } from "@/services/dashboardService";
+import type { AIInsight } from "@/services/aiService";
 
 type AIInsightsProps = {
   metrics: DashboardMetrics | null;
-};
-
-type Insight = {
-  type: "positive" | "warning" | "info";
-  title: string;
-  description: string;
 };
 
 const insightIcons = {
@@ -18,49 +15,46 @@ const insightIcons = {
   info: Sparkles,
 };
 
-function generateInsights(metrics: DashboardMetrics): Insight[] {
-  const insights: Insight[] = [];
-
-  if (metrics.totalRevenue > 0) {
-    insights.push({
-      type: "positive",
-      title: "Revenue is active",
-      description: `Your business has generated $${metrics.totalRevenue.toLocaleString()} in revenue.`,
-    });
-  }
-
-  if (metrics.lowStockCount > 0) {
-    insights.push({
-      type: "warning",
-      title: "Low stock detected",
-      description: `${metrics.lowStockCount} product${
-        metrics.lowStockCount !== 1 ? "s" : ""
-      } need${metrics.lowStockCount === 1 ? "s" : ""} attention.`,
-    });
-  }
-
-  if (metrics.totalOrders > 0) {
-    insights.push({
-      type: "info",
-      title: "Orders are coming in",
-      description: `You have ${metrics.totalOrders.toLocaleString()} completed orders in the selected period.`,
-    });
-  }
-
-  return insights;
-}
-
 const AIInsights = ({ metrics }: AIInsightsProps) => {
-  if (!metrics) {
-    return (
-      <div className="rounded-xl border border-white/10 bg-[#0C0D0F] p-5">
-        <p className="text-sm text-white/40">Loading insights...</p>
-      </div>
-    );
-  }
+  const [insights, setInsights] = useState<AIInsight[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const insights = generateInsights(metrics);
+  useEffect(() => {
+    if (!metrics) return;
 
+    const currentMetrics = metrics;
+    let cancelled = false;
+
+    async function loadInsights() {
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        const result = await generateBusinessInsights(currentMetrics);
+
+        if (!cancelled) {
+          setInsights(result);
+        }
+      } catch (error) {
+        console.error("Failed to generate AI insights:", error);
+
+        if (!cancelled) {
+          setError("Unable to generate AI insights.");
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    loadInsights();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [metrics]);
   return (
     <div className="rounded-xl border border-white/10 bg-[#0C0D0F] p-5">
       <div className="mb-6">
@@ -70,36 +64,52 @@ const AIInsights = ({ metrics }: AIInsightsProps) => {
         </div>
 
         <p className="mt-1 text-sm text-white/40">
-          Highlights from your business data
+          AI-generated insights from your business data
         </p>
       </div>
 
-      <div className="space-y-3">
-        {insights.map((insight) => {
-          const Icon = insightIcons[insight.type];
+      {isLoading && (
+        <div className="py-8 text-center">
+          <p className="text-sm text-white/40">
+            Analyzing your business data...
+          </p>
+        </div>
+      )}
 
-          return (
-            <div
-              key={insight.title}
-              className="rounded-lg border border-white/5 bg-white/2 p-4"
-            >
-              <div className="flex gap-3">
-                <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-white/5">
-                  <Icon className="size-4 text-white/60" />
-                </div>
+      {error && !isLoading && (
+        <div className="rounded-lg border border-red-500/10 bg-red-500/5 p-4">
+          <p className="text-sm text-red-400">{error}</p>
+        </div>
+      )}
 
-                <div>
-                  <p className="text-sm font-medium">{insight.title}</p>
+      {!isLoading && !error && (
+        <div className="space-y-3">
+          {insights.map((insight) => {
+            const Icon = insightIcons[insight.type];
 
-                  <p className="mt-1 text-sm leading-5 text-white/40">
-                    {insight.description}
-                  </p>
+            return (
+              <div
+                key={`${insight.title}-${insight.type}`}
+                className="rounded-lg border border-white/5 bg-white/2 p-4"
+              >
+                <div className="flex gap-3">
+                  <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-white/5">
+                    <Icon className="size-4 text-white/60" />
+                  </div>
+
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium">{insight.title}</p>
+
+                    <p className="mt-1 text-sm leading-5 text-white/40">
+                      {insight.description}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };
