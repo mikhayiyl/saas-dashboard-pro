@@ -1,98 +1,106 @@
-import { get, increment, ref, update } from "firebase/database";
-import { createActivity } from "./activityService";
+import { push, ref, runTransaction } from "firebase/database";
+
 import { db } from "../lib/Firebase";
-import type { Order } from "../types/database";
-import { createNotification } from "./notificationService";
+import type { Activity, Notification, Order } from "../types/database";
 
-function buildCompletedOrderUpdates(
-  workspaceId: string,
-  order: Order,
-  direction: "apply" | "reverse",
-): Record<string, unknown> {
-  const multiplier = direction === "apply" ? 1 : -1;
+type WorkspaceData = {
+  products?: Record<string, any>;
+  customers?: Record<string, any>;
+  orders?: Record<string, Order>;
+  activities?: Record<string, Activity>;
+  notifications?: Record<string, Notification>;
+};
 
-  const updates: Record<string, unknown> = {};
+function createActivity(workspaceId: string, message: string): Activity {
+  const id = push(ref(db, "activities")).key;
 
-  updates[
-    `workspaces/${workspaceId}/customers/${order.customerId}/totalOrders`
-  ] = increment(multiplier);
-
-  updates[
-    `workspaces/${workspaceId}/customers/${order.customerId}/totalSpent`
-  ] = increment(order.total * multiplier);
-
-  for (const item of order.items) {
-    updates[`workspaces/${workspaceId}/products/${item.productId}/stock`] =
-      increment(-item.quantity * multiplier);
-
-    updates[`workspaces/${workspaceId}/products/${item.productId}/orders`] =
-      increment(item.quantity * multiplier);
-
-    updates[`workspaces/${workspaceId}/products/${item.productId}/revenue`] =
-      increment(item.price * item.quantity * multiplier);
+  if (!id) {
+    throw new Error("Unable to create activity.");
   }
 
-  return updates;
+  return {
+    id,
+    workspaceId,
+    type: "order",
+    message,
+    timestamp: Date.now(),
+  };
 }
 
-async function validateCompletedOrder(
+function createNotification(
   workspaceId: string,
-  order: Order,
-  direction: "apply" | "reverse",
-) {
-  const customerRef = ref(
-    db,
-    `workspaces/${workspaceId}/customers/${order.customerId}`,
-  );
+  message: string,
+  type: Notification["type"],
+): Notification {
+  const id = push(ref(db, "notifications")).key;
 
-  const customerSnapshot = await get(customerRef);
-
-  if (!customerSnapshot.exists()) {
-    throw new Error("Customer not found.");
+  if (!id) {
+    throw new Error("Unable to create notification.");
   }
 
+  return {
+    id,
+    workspaceId,
+    title: "Order updated",
+    message,
+    type,
+    read: false,
+    timestamp: Date.now(),
+  };
+}
+
+function applyInventory(products: Record<string, any>, order: Order) {
+  const updatedProducts = { ...products };
+
+  // Check everything before changing any product.
   for (const item of order.items) {
-    const productRef = ref(
-      db,
-      `workspaces/${workspaceId}/products/${item.productId}`,
-    );
+    const product = updatedProducts[item.productId];
 
-    const productSnapshot = await get(productRef);
-
-    if (!productSnapshot.exists()) {
+    if (!product) {
       throw new Error(`Product "${item.name}" no longer exists.`);
     }
 
-    if (direction === "apply") {
-      const product = productSnapshot.val();
-
-      if (product.stock < item.quantity) {
-        throw new Error(`Not enough stock for "${item.name}".`);
-      }
+    if (product.stock < item.quantity) {
+      throw new Error(
+        `Not enough stock for "${item.name}". Required: ${item.quantity}, available: ${product.stock}.`,
+      );
     }
   }
+
+  // Apply the inventory changes only after all checks pass.
+  for (const item of order.items) {
+    const product = updatedProducts[item.productId];
+
+    updatedProducts[item.productId] = {
+      ...product,
+      stock: product.stock - item.quantity,
+      orders: (product.orders ?? 0) + item.quantity,
+      revenue: (product.revenue ?? 0) + item.price * item.quantity,
+    };
+  }
+
+  return updatedProducts;
 }
 
-export async function completeOrder(
-  workspaceId: string,
-  order: Order,
-): Promise<void> {
-  await validateCompletedOrder(workspaceId, order, "apply");
+function reverseInventory(products: Record<string, any>, order: Order) {
+  const updatedProducts = { ...products };
 
-  const updates = buildCompletedOrderUpdates(workspaceId, order, "apply");
+  for (const item of order.items) {
+    const product = updatedProducts[item.productId];
 
-  await update(ref(db), updates);
-}
+    if (!product) {
+      throw new Error(`Product "${item.name}" no longer exists.`);
+    }
 
-export async function reverseCompletedOrder(
-  workspaceId: string,
-  order: Order,
-): Promise<void> {
-  await validateCompletedOrder(workspaceId, order, "reverse");
+    updatedProducts[item.productId] = {
+      ...product,
+      stock: product.stock + item.quantity,
+      orders: Math.max(0, (product.orders ?? 0) - item.quantity),
+      revenue: Math.max(0, (product.revenue ?? 0) - item.price * item.quantity),
+    };
+  }
 
-  const updates = buildCompletedOrderUpdates(workspaceId, order, "reverse");
-
-  await update(ref(db), updates);
+  return updatedProducts;
 }
 
 export async function transitionOrderStatus(
@@ -100,88 +108,177 @@ export async function transitionOrderStatus(
   orderId: string,
   newStatus: Order["status"],
 ): Promise<void> {
-  const orderRef = ref(db, `workspaces/${workspaceId}/orders/${orderId}`);
+  const workspaceRef = ref(db, `workspaces/${workspaceId}`);
 
-  const snapshot = await get(orderRef);
+  const result = await runTransaction(workspaceRef, (workspace) => {
+    if (!workspace) {
+      throw new Error("Workspace not found.");
+    }
 
-  if (!snapshot.exists()) {
-    throw new Error("Order not found.");
-  }
+    const data = workspace as WorkspaceData;
 
-  const order = {
-    ...(snapshot.val() as Order),
-    id: snapshot.key ?? orderId,
-  };
+    const products = data.products ?? {};
+    const customers = data.customers ?? {};
+    const orders = data.orders ?? {};
 
-  const previousStatus = order.status;
+    const order = orders[orderId];
 
-  if (previousStatus === newStatus) {
-    return;
-  }
+    if (!order) {
+      throw new Error("Order not found.");
+    }
 
-  const wasCompleted = previousStatus === "completed";
-  const willBeCompleted = newStatus === "completed";
+    const previousStatus = order.status;
 
-  const updates: Record<string, unknown> = {
-    [`workspaces/${workspaceId}/orders/${orderId}/status`]: newStatus,
-  };
+    if (previousStatus === newStatus) {
+      return workspace;
+    }
 
-  if (!wasCompleted && willBeCompleted) {
-    await validateCompletedOrder(workspaceId, order, "apply");
+    const customer = customers[order.customerId];
 
-    Object.assign(
-      updates,
-      buildCompletedOrderUpdates(workspaceId, order, "apply"),
-    );
-  }
+    if (!customer) {
+      throw new Error("Customer not found.");
+    }
 
-  if (wasCompleted && !willBeCompleted) {
-    await validateCompletedOrder(workspaceId, order, "reverse");
+    const wasCompleted = previousStatus === "completed";
 
-    Object.assign(
-      updates,
-      buildCompletedOrderUpdates(workspaceId, order, "reverse"),
-    );
-  }
+    const willBeCompleted = newStatus === "completed";
 
-  await update(ref(db), updates);
+    let updatedProducts = products;
+    let updatedCustomer = { ...customer };
 
-  await createActivity({
-    workspaceId,
-    type: "order",
-    message: `Order status changed from ${previousStatus} to ${newStatus}.`,
-  });
+    if (!wasCompleted && willBeCompleted) {
+      updatedProducts = applyInventory(products, order);
 
-  await createNotification({
-    workspaceId,
-    title: "Order updated",
-    message: `Order status changed from ${previousStatus} to ${newStatus}.`,
-    type:
+      updatedCustomer = {
+        ...updatedCustomer,
+        totalOrders: (customer.totalOrders ?? 0) + 1,
+        totalSpent: (customer.totalSpent ?? 0) + order.total,
+      };
+    }
+
+    if (wasCompleted && !willBeCompleted) {
+      updatedProducts = reverseInventory(products, order);
+
+      updatedCustomer = {
+        ...updatedCustomer,
+        totalOrders: Math.max(0, (customer.totalOrders ?? 0) - 1),
+        totalSpent: Math.max(0, (customer.totalSpent ?? 0) - order.total),
+      };
+    }
+
+    const message = `Order status changed from ${previousStatus} to ${newStatus}.`;
+
+    const activity = createActivity(workspaceId, message);
+
+    const notification = createNotification(
+      workspaceId,
+      message,
       newStatus === "completed"
         ? "success"
         : newStatus === "cancelled"
           ? "warning"
           : "info",
-    read: false,
+    );
+
+    return {
+      ...workspace,
+
+      products: updatedProducts,
+
+      customers: {
+        ...customers,
+        [order.customerId]: updatedCustomer,
+      },
+
+      orders: {
+        ...orders,
+        [orderId]: {
+          ...order,
+          status: newStatus,
+        },
+      },
+
+      activities: {
+        ...(data.activities ?? {}),
+        [activity.id]: activity,
+      },
+
+      notifications: {
+        ...(data.notifications ?? {}),
+        [notification.id]: notification,
+      },
+    };
   });
+
+  if (!result.committed) {
+    throw new Error("Unable to update the order.");
+  }
 }
 
 export async function deleteOrderWithBusinessLogic(
   workspaceId: string,
   order: Order,
 ): Promise<void> {
-  const updates: Record<string, unknown> = {
-    [`workspaces/${workspaceId}/orders/${order.id}`]: null,
-  };
+  const workspaceRef = ref(db, `workspaces/${workspaceId}`);
 
-  if (order.status === "completed") {
-    await validateCompletedOrder(workspaceId, order, "reverse");
+  const result = await runTransaction(workspaceRef, (workspace) => {
+    if (!workspace) {
+      throw new Error("Workspace not found.");
+    }
 
-    Object.assign(
-      updates,
-      buildCompletedOrderUpdates(workspaceId, order, "reverse"),
-    );
+    const data = workspace as WorkspaceData;
+
+    const products = data.products ?? {};
+    const customers = data.customers ?? {};
+    const orders = data.orders ?? {};
+
+    const currentOrder = orders[order.id];
+
+    if (!currentOrder) {
+      throw new Error("Order no longer exists.");
+    }
+
+    let updatedProducts = products;
+    let updatedCustomer = customers[currentOrder.customerId];
+
+    if (currentOrder.status === "completed") {
+      if (!updatedCustomer) {
+        throw new Error("Customer not found.");
+      }
+
+      updatedProducts = reverseInventory(products, currentOrder);
+
+      updatedCustomer = {
+        ...updatedCustomer,
+        totalOrders: Math.max(0, (updatedCustomer.totalOrders ?? 0) - 1),
+        totalSpent: Math.max(
+          0,
+          (updatedCustomer.totalSpent ?? 0) - currentOrder.total,
+        ),
+      };
+    }
+
+    const updatedOrders = { ...orders };
+
+    delete updatedOrders[order.id];
+
+    return {
+      ...workspace,
+
+      products: updatedProducts,
+
+      customers: updatedCustomer
+        ? {
+            ...customers,
+            [currentOrder.customerId]: updatedCustomer,
+          }
+        : customers,
+
+      orders: updatedOrders,
+    };
+  });
+
+  if (!result.committed) {
+    throw new Error("Unable to delete the order.");
   }
-
-  await update(ref(db), updates);
 }

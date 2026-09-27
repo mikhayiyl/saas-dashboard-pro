@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "../components/ui/dialog";
-
 import { useAuth } from "../context/AuthContext";
 import { getUserProfile } from "../services/userService";
-
 import { subscribeToOrders } from "../services/orderService";
 import {
   deleteOrderWithBusinessLogic,
@@ -16,7 +16,6 @@ import {
 } from "../services/orderBusinessService";
 import { subscribeToCustomers } from "../services/customerService";
 import { subscribeToProducts } from "../services/productService";
-
 import type { Customer, Order, Product } from "../types/database";
 import OrderForm from "@/components/orders/OrderForm";
 import ConfirmDeleteModal from "@/components/common/ConfirmDeleteModal";
@@ -31,7 +30,6 @@ function Orders() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [workspaceId, setWorkspaceId] = useState("");
   const [orderToDelete, setOrderToDelete] = useState<Order | null>(null);
-
   const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
@@ -42,6 +40,7 @@ function Orders() {
     let unsubscribeOrders: (() => void) | undefined;
     let unsubscribeCustomers: (() => void) | undefined;
     let unsubscribeProducts: (() => void) | undefined;
+
     async function loadOrders() {
       try {
         const profile = await getUserProfile(uid);
@@ -73,6 +72,13 @@ function Orders() {
       } catch (error) {
         console.error("Failed to load orders:", error);
         setLoading(false);
+
+        toast.error("Unable to load orders", {
+          description:
+            error instanceof Error
+              ? error.message
+              : "Something went wrong while loading orders.",
+        });
       }
     }
 
@@ -94,8 +100,19 @@ function Orders() {
 
     try {
       await transitionOrderStatus(workspaceId, orderId, status);
+
+      toast.success("Order updated", {
+        description: `Order status changed to ${status}.`,
+      });
     } catch (error) {
       console.error("Failed to update order status:", error);
+
+      toast.error("Unable to update order", {
+        description:
+          error instanceof Error
+            ? error.message
+            : "Something went wrong. Please try again.",
+      });
     }
   }
 
@@ -108,12 +125,24 @@ function Orders() {
       await deleteOrderWithBusinessLogic(workspaceId, orderToDelete);
 
       setOrderToDelete(null);
+
+      toast.success("Order deleted", {
+        description: "The order and its related data were updated.",
+      });
     } catch (error) {
       console.error("Failed to delete order:", error);
+
+      toast.error("Unable to delete order", {
+        description:
+          error instanceof Error
+            ? error.message
+            : "Something went wrong. Please try again.",
+      });
     } finally {
       setIsDeleting(false);
     }
   }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -125,7 +154,6 @@ function Orders() {
   return (
     <div className="space-y-6">
       {/* Header */}
-
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold text-white">Orders</h1>
@@ -143,6 +171,7 @@ function Orders() {
           Create Order
         </button>
       </div>
+
       {/* Orders table */}
       <div className="overflow-x-auto rounded-xl border border-white/10 bg-[#0C0D0F]">
         <table className="w-full min-w-225 text-sm">
@@ -159,6 +188,7 @@ function Orders() {
               <th className="px-6 py-4 font-medium">Status</th>
 
               <th className="px-6 py-4 font-medium">Date</th>
+
               <th className="px-6 py-4 font-medium">Actions</th>
             </tr>
           </thead>
@@ -187,6 +217,7 @@ function Orders() {
                 <td className="px-6 py-4 font-medium text-white">
                   ${order.total.toLocaleString()}
                 </td>
+
                 <td className="px-6 py-4">
                   <select
                     value={order.status}
@@ -239,6 +270,7 @@ function Orders() {
                 <td className="px-6 py-4 text-white/50">
                   {new Date(order.createdAt).toLocaleDateString()}
                 </td>
+
                 <td className="px-6 py-4">
                   <button
                     type="button"
@@ -253,6 +285,7 @@ function Orders() {
           </tbody>
         </table>
       </div>
+
       {/* Create Order Dialog */}
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
         <DialogContent className="border-white/10 bg-[#0C0D0F] text-white sm:max-w-2xl">
@@ -269,12 +302,15 @@ function Orders() {
           />
         </DialogContent>
       </Dialog>
+
       {/* Delete Confirmation */}
       <ConfirmDeleteModal
         open={Boolean(orderToDelete)}
         itemName={
           orderToDelete
-            ? `${customerMap.get(orderToDelete.customerId) ?? "Unknown customer"} • $${orderToDelete.total.toLocaleString()}`
+            ? `${
+                customerMap.get(orderToDelete.customerId) ?? "Unknown customer"
+              } • $${orderToDelete.total.toLocaleString()}`
             : ""
         }
         itemType="order"

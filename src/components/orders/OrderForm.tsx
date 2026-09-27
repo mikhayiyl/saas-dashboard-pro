@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import type { Customer, OrderItem, Product } from "../../types/database";
 
 import { createOrder } from "../../services/orderService";
+import { toast } from "sonner";
 
 type OrderFormProps = {
   workspaceId: string;
@@ -73,7 +74,7 @@ function OrderForm({
       return;
     }
 
-    if (quantity < 1) {
+    if (!Number.isFinite(quantity) || quantity < 1) {
       setError("Quantity must be at least 1.");
       return;
     }
@@ -123,7 +124,13 @@ function OrderForm({
       onSuccess();
     } catch (error) {
       console.error("Failed to create order:", error);
-      setError("Failed to create order. Please try again.");
+
+      toast.error("Unable to create order", {
+        description:
+          error instanceof Error
+            ? error.message
+            : "Something went wrong. Please try again.",
+      });
     } finally {
       setIsSubmitting(false);
     }
