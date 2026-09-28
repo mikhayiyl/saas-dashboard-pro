@@ -1,6 +1,5 @@
-import { get, ref, set } from "firebase/database";
+import { get, ref, set, update } from "firebase/database";
 import { db } from "../lib/Firebase";
-
 import type { UserProfile } from "../types/database";
 
 export async function getUserProfile(uid: string): Promise<UserProfile | null> {
@@ -28,4 +27,11 @@ export async function createUserProfile(
     ...data,
     createdAt: Date.now(),
   });
+}
+
+export async function updateUserProfile(
+  uid: string,
+  updates: Partial<UserProfile>,
+): Promise<void> {
+  await update(ref(db, `users/${uid}`), updates);
 }
