@@ -4,13 +4,15 @@ import { toast } from "sonner";
 import { useAuth } from "../context/AuthContext";
 import type { UserProfile } from "../types/database";
 import { getUserProfile, updateUserProfile } from "../services/userService";
-import { signOut, updatePassword } from "firebase/auth";
+
 import {
   EmailAuthProvider,
   reauthenticateWithCredential,
   verifyBeforeUpdateEmail,
+  sendPasswordResetEmail,
+  signOut,
 } from "firebase/auth";
-import { sendPasswordResetEmail } from "firebase/auth";
+
 import { auth } from "../lib/Firebase";
 
 import {
@@ -41,7 +43,7 @@ const Settings = () => {
   const [newEmail, setNewEmail] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [isUpdatingEmail, setIsUpdatingEmail] = useState(false);
-
+  console.log(1);
   useEffect(() => {
     if (!user) return;
     async function loadProfile() {
@@ -51,6 +53,7 @@ const Settings = () => {
         setLoading(true);
 
         await user.reload();
+        console.log("Firebase Auth email:", user.email);
 
         const authEmail = user.email;
 
@@ -167,33 +170,16 @@ const Settings = () => {
 
       toast.success("Verification email sent", {
         description:
-          "Check your new email address and verify it to complete the change.",
+          "Check your new email address and click the verification link to complete the change.",
       });
 
       setNewEmail("");
       setCurrentPassword("");
       setIsEmailDialogOpen(false);
-
-      setProfile((current) =>
-        current
-          ? {
-              ...current,
-              email: trimmedEmail,
-            }
-          : current,
-      );
-
-      setNewEmail("");
-      setCurrentPassword("");
-      setIsEmailDialogOpen(false);
-
-      toast.success("Email updated", {
-        description: "Your email address has been updated successfully.",
-      });
     } catch (error) {
       console.error("Failed to update email:", error);
 
-      toast.error("Unable to update email", {
+      toast.error("Unable to change email", {
         description:
           error instanceof Error
             ? error.message
@@ -203,6 +189,7 @@ const Settings = () => {
       setIsUpdatingEmail(false);
     }
   }
+
   async function handlePasswordReset() {
     if (!user?.email) return;
 
