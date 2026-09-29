@@ -1,7 +1,7 @@
 import { Bell, Menu, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
 import { getUserProfile } from "@/services/userService";
 import {
   markAllNotificationsAsRead,

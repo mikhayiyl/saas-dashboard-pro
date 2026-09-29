@@ -1,7 +1,7 @@
 import { AlertTriangle, Package, ShoppingCart, UserPlus } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../hooks/useAuth";
 import { getUserProfile } from "../../services/userService";
 import { subscribeToActivities } from "../../services/activityService";
 

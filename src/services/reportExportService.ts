@@ -1,6 +1,3 @@
-import { jsPDF } from "jspdf";
-import * as XLSX from "xlsx";
-
 type ReportDateRange = "7" | "30" | "90" | "all";
 
 type ReportExportData = {
@@ -69,7 +66,8 @@ function getFileDate() {
   return new Date().toISOString().slice(0, 10);
 }
 
-export function exportReportToExcel(data: ReportExportData) {
+export async function exportReportToExcel(data: ReportExportData) {
+  const XLSX = await import("xlsx");
   const workbook = XLSX.utils.book_new();
 
   const periodLabel = getDateRangeLabel(data.dateRange);
@@ -155,7 +153,8 @@ export function exportReportToExcel(data: ReportExportData) {
   XLSX.writeFileXLSX(workbook, `business-report-${getFileDate()}.xlsx`);
 }
 
-export function exportReportToPDF(data: ReportExportData) {
+export async function exportReportToPDF(data: ReportExportData) {
+  const { jsPDF } = await import("jspdf");
   const doc = new jsPDF();
 
   const pageWidth = doc.internal.pageSize.getWidth();

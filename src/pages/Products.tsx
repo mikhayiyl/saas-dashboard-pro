@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../hooks/useAuth";
 import { deleteProduct, subscribeToProducts } from "../services/productService";
 import { getUserProfile } from "../services/userService";
 import ProductForm from "../components/products/ProductForm";

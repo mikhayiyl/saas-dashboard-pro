@@ -1,11 +1,17 @@
 import { push, ref, runTransaction } from "firebase/database";
 
 import { db } from "../lib/Firebase";
-import type { Activity, Notification, Order } from "../types/database";
+import type {
+  Activity,
+  Customer,
+  Notification,
+  Order,
+  Product,
+} from "../types/database";
 
 type WorkspaceData = {
-  products?: Record<string, any>;
-  customers?: Record<string, any>;
+  products?: Record<string, Product>;
+  customers?: Record<string, Customer>;
   orders?: Record<string, Order>;
   activities?: Record<string, Activity>;
   notifications?: Record<string, Notification>;
@@ -49,7 +55,7 @@ function createNotification(
   };
 }
 
-function applyInventory(products: Record<string, any>, order: Order) {
+function applyInventory(products: Record<string, Product>, order: Order) {
   const updatedProducts = { ...products };
 
   // Check everything before changing any product.
@@ -82,7 +88,7 @@ function applyInventory(products: Record<string, any>, order: Order) {
   return updatedProducts;
 }
 
-function reverseInventory(products: Record<string, any>, order: Order) {
+function reverseInventory(products: Record<string, Product>, order: Order) {
   const updatedProducts = { ...products };
 
   for (const item of order.items) {

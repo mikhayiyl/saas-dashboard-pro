@@ -11,53 +11,12 @@ import CategoryChart from "@/components/dashboard/CategoryChart";
 import ProductPerformance from "@/components/dashboard/ProductPerformance";
 import AIInsights from "@/components/dashboard/AIInsights";
 import LiveActivity from "@/components/dashboard/LiveActivity";
-import {
-  subscribeToDashboardData,
-  type DashboardDateRange,
-  type DashboardMetrics,
-} from "@/services/dashboardService";
-
-import { useEffect, useState } from "react";
-import { useAuth } from "@/context/AuthContext";
-import { getUserProfile } from "@/services/userService";
+import { type DashboardDateRange } from "@/services/dashboardService";
+import useMetrics from "@/hooks/useMetrics";
 
 function Dashboard() {
-  const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
-  const [dateRange, setDateRange] = useState<DashboardDateRange>("all");
-  const { user } = useAuth();
+  const { metrics, dateRange, setDateRange } = useMetrics();
 
-  useEffect(() => {
-    if (!user) return;
-
-    const uid = user.uid;
-    let unsubscribe: (() => void) | undefined;
-
-    async function loadDashboard() {
-      try {
-        const profile = await getUserProfile(uid);
-
-        if (!profile) {
-          throw new Error("User profile not found.");
-        }
-
-        unsubscribe = subscribeToDashboardData(
-          profile.workspaceId,
-          (__, metrics) => {
-            setMetrics(metrics);
-          },
-          dateRange,
-        );
-      } catch (error) {
-        console.error("Failed to load dashboard:", error);
-      }
-    }
-
-    loadDashboard();
-
-    return () => {
-      unsubscribe?.();
-    };
-  }, [user, dateRange]);
   const stats = [
     {
       title: "Total Revenue",

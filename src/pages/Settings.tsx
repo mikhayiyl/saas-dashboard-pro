@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../hooks/useAuth";
 import type { UserProfile } from "../types/database";
 import { getUserProfile, updateUserProfile } from "../services/userService";
 

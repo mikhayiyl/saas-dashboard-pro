@@ -1,16 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../hooks/useAuth";
 import { getUserProfile } from "../services/userService";
 import { subscribeToOrders } from "../services/orderService";
 import { subscribeToCustomers } from "../services/customerService";
 import { subscribeToProducts } from "../services/productService";
 import type { Customer, Order, Product } from "../types/database";
 import { FileSpreadsheet, FileText } from "lucide-react";
-
-import {
-  exportReportToExcel,
-  exportReportToPDF,
-} from "../services/reportExportService";
 
 type DateRange = "7" | "30" | "90" | "all";
 
@@ -257,12 +252,18 @@ function Reports() {
     ],
   );
 
-  const handleExportExcel = () => {
-    exportReportToExcel(exportData);
+  const handleExportExcel = async () => {
+    const { exportReportToExcel } =
+      await import("../services/reportExportService");
+
+    await exportReportToExcel(exportData);
   };
 
-  const handleExportPDF = () => {
-    exportReportToPDF(exportData);
+  const handleExportPDF = async () => {
+    const { exportReportToPDF } =
+      await import("../services/reportExportService");
+
+    await exportReportToPDF(exportData);
   };
 
   if (loading) {

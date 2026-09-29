@@ -7,7 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../components/ui/dialog";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../hooks/useAuth";
 import { getUserProfile } from "../services/userService";
 import { subscribeToOrders } from "../services/orderService";
 import {
