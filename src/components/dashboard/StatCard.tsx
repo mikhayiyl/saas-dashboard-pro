@@ -4,6 +4,7 @@ type StatCardProps = {
   title: string;
   value: string;
   change: string;
+  changeContext: string;
   icon: LucideIcon;
   positive?: boolean;
 };
@@ -12,6 +13,7 @@ function StatCard({
   title,
   value,
   change,
+  changeContext,
   icon: Icon,
   positive = true,
 }: StatCardProps) {
@@ -42,7 +44,7 @@ function StatCard({
           {change}
         </span>
 
-        <span className="text-white/40">from last month</span>
+        <span className="text-white/40">{changeContext}</span>
       </div>
     </div>
   );

@@ -14,38 +14,86 @@ import LiveActivity from "@/components/dashboard/LiveActivity";
 import { type DashboardDateRange } from "@/services/dashboardService";
 import useMetrics from "@/hooks/useMetrics";
 
+function getChange(current: number, previous: number) {
+  if (previous === 0) {
+    return {
+      value: current === 0 ? "0%" : "New",
+      positive: current >= 0,
+    };
+  }
+
+  const percentageChange = ((current - previous) / previous) * 100;
+
+  return {
+    value: `${percentageChange > 0 ? "+" : ""}${percentageChange.toFixed(1)}%`,
+    positive: percentageChange >= 0,
+  };
+}
+
 function Dashboard() {
   const { metrics, dateRange, setDateRange } = useMetrics();
+  const comparison = metrics?.comparison;
+  const isAllTime = dateRange === "all";
+  const customerCount =
+    metrics === null
+      ? null
+      : isAllTime
+        ? metrics.totalCustomers
+        : (comparison?.customersAdded.current ?? 0);
+
+  const revenueChange = comparison
+    ? getChange(comparison.revenue.current, comparison.revenue.previous)
+    : { value: "—", positive: true };
+  const ordersChange = comparison
+    ? getChange(comparison.orders.current, comparison.orders.previous)
+    : { value: "—", positive: true };
+  const customersChange = comparison
+    ? getChange(
+        comparison.customersAdded.current,
+        comparison.customersAdded.previous,
+      )
+    : { value: "—", positive: true };
 
   const stats = [
     {
       title: "Total Revenue",
       value: metrics ? `$${metrics.totalRevenue.toLocaleString()}` : "...",
-      change: "+12.5%",
+      change: metrics ? revenueChange.value : "...",
+      changeContext: comparison?.label ?? "All-time total",
       icon: CircleDollarSign,
-      color: "#10B981",
+      positive: revenueChange.positive,
     },
     {
       title: "Total Orders",
       value: metrics ? metrics.totalOrders.toLocaleString() : "...",
-      change: "+8.2%",
+      change: metrics ? ordersChange.value : "...",
+      changeContext: comparison?.label ?? "All-time total",
       icon: ShoppingCart,
-      color: "#0EA5E9",
+      positive: ordersChange.positive,
     },
     {
-      title: "Customers",
-      value: metrics ? metrics.totalCustomers.toLocaleString() : "...",
-      change: "+5.4%",
+      title: isAllTime ? "Customers" : "New Customers",
+      value: customerCount?.toLocaleString() ?? "...",
+      change: metrics ? customersChange.value : "...",
+      changeContext: comparison
+        ? isAllTime
+          ? `New customers ${comparison.label}`
+          : comparison.label
+        : "All-time total",
       icon: Users,
-      color: "#8B5CF6",
+      positive: customersChange.positive,
     },
     {
       title: "Low Stock",
       value: metrics ? metrics.lowStockCount.toLocaleString() : "...",
-      change: "Attention",
+      change: metrics
+        ? metrics.lowStockCount > 0
+          ? "Needs attention"
+          : "Healthy"
+        : "...",
+      changeContext: "Current stock status",
       icon: CircleAlert,
-      positive: false,
-      color: "#F59E0B",
+      positive: metrics ? metrics.lowStockCount === 0 : true,
     },
   ];
 

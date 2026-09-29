@@ -93,6 +93,12 @@ export type DashboardMetrics = {
   totalOrders: number;
   totalCustomers: number;
   lowStockCount: number;
+  comparison: {
+    label: string;
+    revenue: { current: number; previous: number };
+    orders: { current: number; previous: number };
+    customersAdded: { current: number; previous: number };
+  } | null;
 
   revenueByMonth: {
     month: string;
@@ -127,22 +133,43 @@ export function calculateDashboardMetrics(
   const now = new Date();
 
   const startDate = new Date(now);
+  let previousStartDate: Date | null = null;
+  let previousEndDate: Date | null = null;
+  let comparisonLabel = "";
 
   switch (dateRange) {
     case "7d":
       startDate.setDate(now.getDate() - 7);
+      previousEndDate = new Date(startDate);
+      previousStartDate = new Date(previousEndDate);
+      previousStartDate.setDate(previousStartDate.getDate() - 7);
+      comparisonLabel = "vs previous 7 days";
       break;
 
     case "30d":
       startDate.setDate(now.getDate() - 30);
+      previousEndDate = new Date(startDate);
+      previousStartDate = new Date(previousEndDate);
+      previousStartDate.setDate(previousStartDate.getDate() - 30);
+      comparisonLabel = "vs previous 30 days";
       break;
 
     case "this-year":
       startDate.setMonth(0, 1);
       startDate.setHours(0, 0, 0, 0);
+      previousStartDate = new Date(startDate);
+      previousStartDate.setFullYear(previousStartDate.getFullYear() - 1);
+      previousEndDate = new Date(now);
+      previousEndDate.setFullYear(previousEndDate.getFullYear() - 1);
+      comparisonLabel = "vs same period last year";
       break;
 
     case "all":
+      startDate.setDate(now.getDate() - 30);
+      previousEndDate = new Date(startDate);
+      previousStartDate = new Date(previousEndDate);
+      previousStartDate.setDate(previousStartDate.getDate() - 30);
+      comparisonLabel = "Last 30 days vs previous 30 days";
       break;
   }
 
@@ -152,6 +179,24 @@ export function calculateDashboardMetrics(
       : completedOrders.filter(
           (order) => order.createdAt >= startDate.getTime(),
         );
+
+  const previousOrders =
+    previousStartDate && previousEndDate
+      ? completedOrders.filter(
+          (order) =>
+            order.createdAt >= previousStartDate.getTime() &&
+            order.createdAt < previousEndDate.getTime(),
+        )
+      : [];
+
+  const currentComparisonOrders =
+    dateRange === "all"
+      ? completedOrders.filter(
+          (order) =>
+            order.createdAt >= startDate.getTime() &&
+            order.createdAt <= now.getTime(),
+        )
+      : filteredOrders;
 
   const totalRevenue = filteredOrders.reduce(
     (sum, order) => sum + order.total,
@@ -164,6 +209,39 @@ export function calculateDashboardMetrics(
   const lowStockCount = products.filter(
     (product) => product.stock <= 10,
   ).length;
+
+  const comparison =
+    previousStartDate && previousEndDate
+      ? {
+          label: comparisonLabel,
+          revenue: {
+            current: currentComparisonOrders.reduce(
+              (sum, order) => sum + order.total,
+              0,
+            ),
+            previous: previousOrders.reduce(
+              (sum, order) => sum + order.total,
+              0,
+            ),
+          },
+          orders: {
+            current: currentComparisonOrders.length,
+            previous: previousOrders.length,
+          },
+          customersAdded: {
+            current: customers.filter(
+              (customer) =>
+                customer.createdAt >= startDate.getTime() &&
+                customer.createdAt <= now.getTime(),
+            ).length,
+            previous: customers.filter(
+              (customer) =>
+                customer.createdAt >= previousStartDate.getTime() &&
+                customer.createdAt < previousEndDate.getTime(),
+            ).length,
+          },
+        }
+      : null;
 
   const revenueByMonthMap = new Map<
     string,
@@ -242,6 +320,7 @@ export function calculateDashboardMetrics(
     totalOrders,
     totalCustomers,
     lowStockCount,
+    comparison,
     revenueByMonth,
     salesByCategory,
     productPerformance,
