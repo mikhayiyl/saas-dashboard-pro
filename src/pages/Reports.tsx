@@ -5,6 +5,12 @@ import { subscribeToOrders } from "../services/orderService";
 import { subscribeToCustomers } from "../services/customerService";
 import { subscribeToProducts } from "../services/productService";
 import type { Customer, Order, Product } from "../types/database";
+import { FileSpreadsheet, FileText } from "lucide-react";
+
+import {
+  exportReportToExcel,
+  exportReportToPDF,
+} from "../services/reportExportService";
 
 type DateRange = "7" | "30" | "90" | "all";
 
@@ -17,6 +23,7 @@ function Reports() {
 
   const [loading, setLoading] = useState(true);
   const [dateRange, setDateRange] = useState<DateRange>("30");
+  const [currentTime, setCurrentTime] = useState<number | null>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -30,6 +37,7 @@ function Reports() {
     async function loadReports() {
       try {
         setLoading(true);
+        setCurrentTime(Date.now());
 
         const profile = await getUserProfile(userId);
 
@@ -69,11 +77,15 @@ function Reports() {
       return orders;
     }
 
+    if (currentTime === null) {
+      return [];
+    }
+
     const days = Number(dateRange);
-    const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
+    const cutoff = currentTime - days * 24 * 60 * 60 * 1000;
 
     return orders.filter((order) => order.createdAt >= cutoff);
-  }, [orders, dateRange]);
+  }, [orders, dateRange, currentTime]);
 
   const completedOrders = useMemo(
     () => filteredOrders.filter((order) => order.status === "completed"),
@@ -197,6 +209,62 @@ function Reports() {
       .slice(0, 5);
   }, [completedOrders, customers]);
 
+  const exportData = useMemo(
+    () => ({
+      dateRange,
+
+      totalRevenue,
+      totalOrders,
+      averageOrderValue,
+      totalItemsSold,
+
+      orderStatusCounts,
+
+      topProducts: topProducts.map((item) => ({
+        product: {
+          id: item.product.id,
+          name: item.product.name,
+        },
+        quantity: item.quantity,
+        revenue: item.revenue,
+      })),
+
+      topCustomers: topCustomers.map((item) => ({
+        customer: {
+          id: item.customer.id,
+          name: item.customer.name,
+        },
+        orders: item.orders,
+        revenue: item.revenue,
+      })),
+
+      lowStockProducts: lowStockProducts.map((product) => ({
+        id: product.id,
+        name: product.name,
+        stock: product.stock,
+      })),
+    }),
+    [
+      dateRange,
+      totalRevenue,
+      totalOrders,
+      averageOrderValue,
+      totalItemsSold,
+      orderStatusCounts,
+      topProducts,
+      topCustomers,
+      lowStockProducts,
+    ],
+  );
+
+  const handleExportExcel = () => {
+    exportReportToExcel(exportData);
+  };
+
+  const handleExportPDF = () => {
+    exportReportToPDF(exportData);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -207,7 +275,7 @@ function Reports() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+      <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
         <div>
           <h1 className="text-2xl font-semibold text-white">Reports</h1>
 
@@ -216,27 +284,47 @@ function Reports() {
           </p>
         </div>
 
-        <select
-          value={dateRange}
-          onChange={(event) => setDateRange(event.target.value as DateRange)}
-          className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none"
-        >
-          <option value="7" className="bg-[#0C0D0F]">
-            Last 7 days
-          </option>
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <select
+            value={dateRange}
+            onChange={(event) => setDateRange(event.target.value as DateRange)}
+            className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none"
+          >
+            <option value="7" className="bg-[#0C0D0F]">
+              Last 7 days
+            </option>
 
-          <option value="30" className="bg-[#0C0D0F]">
-            Last 30 days
-          </option>
+            <option value="30" className="bg-[#0C0D0F]">
+              Last 30 days
+            </option>
 
-          <option value="90" className="bg-[#0C0D0F]">
-            Last 90 days
-          </option>
+            <option value="90" className="bg-[#0C0D0F]">
+              Last 90 days
+            </option>
 
-          <option value="all" className="bg-[#0C0D0F]">
-            All time
-          </option>
-        </select>
+            <option value="all" className="bg-[#0C0D0F]">
+              All time
+            </option>
+          </select>
+
+          <button
+            type="button"
+            onClick={handleExportExcel}
+            className="inline-flex items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm font-medium text-white transition hover:bg-white/10"
+          >
+            <FileSpreadsheet className="h-4 w-4 text-emerald-400" />
+            Excel
+          </button>
+
+          <button
+            type="button"
+            onClick={handleExportPDF}
+            className="inline-flex items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm font-medium text-white transition hover:bg-white/10"
+          >
+            <FileText className="h-4 w-4 text-red-400" />
+            PDF
+          </button>
+        </div>
       </div>
 
       {/* Summary */}
