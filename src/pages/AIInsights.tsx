@@ -50,49 +50,54 @@ function AIInsights({ metrics }: AIInsightsProps) {
       (product) => product.stock <= 10,
     );
 
+    // Revenue leader
     if (topProduct) {
       generatedInsights.push({
         type: "positive",
-        title: "Top revenue product",
+        title: "Top revenue driver",
         description: `${topProduct.name} is currently generating the highest revenue at $${topProduct.revenue.toLocaleString()}.`,
         icon: ArrowUpRight,
       });
     }
 
+    // Inventory health
     if (metrics.lowStockCount > 0) {
       generatedInsights.push({
         type: "warning",
         title: "Inventory needs attention",
         description: `${metrics.lowStockCount} product${
           metrics.lowStockCount === 1 ? " is" : "s are"
-        } currently low on stock. Review inventory before accepting more orders.`,
+        } currently below the low-stock threshold.`,
         icon: AlertTriangle,
       });
     } else {
       generatedInsights.push({
         type: "positive",
-        title: "Inventory looks healthy",
-        description: "No products are currently below the low-stock threshold.",
+        title: "Inventory is stable",
+        description:
+          "No products are currently below the configured low-stock threshold.",
         icon: Package,
       });
     }
 
+    // Average order value
     if (metrics.totalOrders > 0) {
       const averageOrderValue = metrics.totalRevenue / metrics.totalOrders;
 
       generatedInsights.push({
         type: "info",
         title: "Average order value",
-        description: `Customers are spending an average of $${averageOrderValue.toLocaleString(
+        description: `The current average order value is $${averageOrderValue.toLocaleString(
           undefined,
           {
             maximumFractionDigits: 2,
           },
-        )} per order.`,
+        )}.`,
         icon: ShoppingCart,
       });
     }
 
+    // Customer activity
     if (metrics.totalCustomers > 0 && metrics.totalOrders > 0) {
       const ordersPerCustomer = metrics.totalOrders / metrics.totalCustomers;
 
@@ -106,6 +111,7 @@ function AIInsights({ metrics }: AIInsightsProps) {
       });
     }
 
+    // Specific products requiring attention
     if (lowStockProducts.length > 0) {
       const productNames = lowStockProducts
         .slice(0, 3)
@@ -137,13 +143,14 @@ function AIInsights({ metrics }: AIInsightsProps) {
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">AI Insights</h1>
+
           <p className="mt-1 text-sm text-muted-foreground">
             Intelligent business insights from your workspace data.
           </p>
         </div>
 
-        <Card>
-          <CardContent className="py-12 text-center text-sm text-muted-foreground">
+        <Card className="border-white/6 bg-[#0C0D0F]">
+          <CardContent className="flex min-h-48 items-center justify-center text-sm text-muted-foreground">
             Analyzing your business data...
           </CardContent>
         </Card>
@@ -155,68 +162,79 @@ function AIInsights({ metrics }: AIInsightsProps) {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">AI Insights</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Intelligent insights generated from your current business data.
+        <div className="flex items-center gap-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10">
+            <Lightbulb className="h-4 w-4 text-violet-400" />
+          </div>
+
+          <h1 className="text-2xl font-semibold tracking-tight">AI Insights</h1>
+        </div>
+
+        <p className="mt-2 text-sm text-muted-foreground">
+          Key business observations generated from your current workspace data.
         </p>
       </div>
 
       {/* Summary */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card>
+        <Card className="border-white/6 bg-[#0C0D0F] shadow-none">
           <CardContent className="flex items-center gap-4 p-5">
-            <div className="rounded-lg bg-emerald-500/10 p-2.5">
+            <div className="rounded-xl bg-emerald-500/10 p-2.5">
               <ArrowUpRight className="h-5 w-5 text-emerald-400" />
             </div>
 
-            <div>
+            <div className="min-w-0">
               <p className="text-xs text-muted-foreground">Revenue</p>
-              <p className="mt-1 text-lg font-semibold">
+
+              <p className="mt-1 truncate text-lg font-semibold text-white">
                 ${metrics.totalRevenue.toLocaleString()}
               </p>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-white/6 bg-[#0C0D0F] shadow-none">
           <CardContent className="flex items-center gap-4 p-5">
-            <div className="rounded-lg bg-blue-500/10 p-2.5">
-              <ShoppingCart className="h-5 w-5 text-blue-400" />
+            <div className="rounded-xl bg-sky-500/10 p-2.5">
+              <ShoppingCart className="h-5 w-5 text-sky-400" />
             </div>
 
             <div>
               <p className="text-xs text-muted-foreground">Orders</p>
-              <p className="mt-1 text-lg font-semibold">
+
+              <p className="mt-1 text-lg font-semibold text-white">
                 {metrics.totalOrders.toLocaleString()}
               </p>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-white/6 bg-[#0C0D0F] shadow-none">
           <CardContent className="flex items-center gap-4 p-5">
-            <div className="rounded-lg bg-violet-500/10 p-2.5">
+            <div className="rounded-xl bg-violet-500/10 p-2.5">
               <Users className="h-5 w-5 text-violet-400" />
             </div>
 
             <div>
               <p className="text-xs text-muted-foreground">Customers</p>
-              <p className="mt-1 text-lg font-semibold">
+
+              <p className="mt-1 text-lg font-semibold text-white">
                 {metrics.totalCustomers.toLocaleString()}
               </p>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-white/6 bg-[#0C0D0F] shadow-none">
           <CardContent className="flex items-center gap-4 p-5">
-            <div className="rounded-lg bg-amber-500/10 p-2.5">
+            <div className="rounded-xl bg-amber-500/10 p-2.5">
               <Package className="h-5 w-5 text-amber-400" />
             </div>
 
             <div>
               <p className="text-xs text-muted-foreground">Low stock</p>
-              <p className="mt-1 text-lg font-semibold">
+
+              <p className="mt-1 text-lg font-semibold text-white">
                 {metrics.lowStockCount}
               </p>
             </div>
@@ -224,24 +242,25 @@ function AIInsights({ metrics }: AIInsightsProps) {
         </Card>
       </div>
 
-      {/* Insights */}
-      <Card>
-        <CardHeader>
+      {/* Main insights */}
+      <Card className="border-white/6 bg-[#0C0D0F] shadow-none">
+        <CardHeader className="border-b border-white/5 pb-4">
           <div className="flex items-center gap-3">
-            <div className="rounded-lg bg-white/5 p-2">
-              <Lightbulb className="h-5 w-5 text-white" />
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-violet-500/10">
+              <Lightbulb className="h-5 w-5 text-violet-400" />
             </div>
 
             <div>
-              <CardTitle>Business insights</CardTitle>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Key observations based on your current workspace data.
+              <CardTitle className="text-base">Business insights</CardTitle>
+
+              <p className="mt-1 text-xs text-muted-foreground">
+                Key observations based on current workspace activity.
               </p>
             </div>
           </div>
         </CardHeader>
 
-        <CardContent className="space-y-3">
+        <CardContent className="space-y-3 pt-5">
           {insights.map((insight, index) => {
             const Icon = insight.icon;
 
@@ -250,14 +269,16 @@ function AIInsights({ metrics }: AIInsightsProps) {
                 ? "bg-emerald-500/10 text-emerald-400"
                 : insight.type === "warning"
                   ? "bg-amber-500/10 text-amber-400"
-                  : "bg-blue-500/10 text-blue-400";
+                  : "bg-sky-500/10 text-sky-400";
 
             return (
               <div
                 key={`${insight.title}-${index}`}
-                className="flex gap-4 rounded-xl border border-white/10 bg-white/2 p-4"
+                className="flex gap-4 rounded-xl border border-white/5 bg-[#101114] p-4 transition-colors hover:border-white/9"
               >
-                <div className={`shrink-0 rounded-lg p-2 ${iconClass}`}>
+                <div
+                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${iconClass}`}
+                >
                   <Icon className="h-4 w-4" />
                 </div>
 
@@ -282,38 +303,50 @@ function AIInsights({ metrics }: AIInsightsProps) {
         </CardContent>
       </Card>
 
-      {/* Opportunity */}
-      <Card>
-        <CardHeader>
-          <CardTitle>What to focus on</CardTitle>
+      {/* Focus area */}
+      <Card className="border-white/6 bg-[#0C0D0F] shadow-none">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-base">Recommended focus</CardTitle>
+
+          <p className="text-xs text-muted-foreground">
+            The most relevant action based on current metrics.
+          </p>
         </CardHeader>
 
         <CardContent>
           {metrics.lowStockCount > 0 ? (
-            <div className="flex gap-4 rounded-xl border border-amber-500/20 bg-amber-500/5 p-4">
-              <ArrowDownRight className="mt-0.5 h-5 w-5 shrink-0 text-amber-400" />
+            <div className="flex gap-4 rounded-xl border border-amber-500/15 bg-amber-500/4 p-4">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-500/10">
+                <ArrowDownRight className="h-4 w-4 text-amber-400" />
+              </div>
 
               <div>
                 <p className="text-sm font-medium text-white">
                   Review inventory
                 </p>
+
                 <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                  Several products have limited stock. Consider reviewing
-                  inventory levels before processing additional orders.
+                  {metrics.lowStockCount} product
+                  {metrics.lowStockCount === 1 ? " is" : "s are"} below the
+                  low-stock threshold. Review replenishment levels before
+                  processing additional demand.
                 </p>
               </div>
             </div>
           ) : (
-            <div className="flex gap-4 rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4">
-              <ArrowUpRight className="mt-0.5 h-5 w-5 shrink-0 text-emerald-400" />
+            <div className="flex gap-4 rounded-xl border border-emerald-500/15 bg-emerald-500/4 p-4">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10">
+                <ArrowUpRight className="h-4 w-4 text-emerald-400" />
+              </div>
 
               <div>
                 <p className="text-sm font-medium text-white">
-                  Keep monitoring performance
+                  Monitor performance
                 </p>
+
                 <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                  Current inventory levels do not indicate an immediate stock
-                  issue. Continue monitoring revenue and order activity.
+                  Inventory is currently above the low-stock threshold. Continue
+                  monitoring revenue, orders, and customer activity for changes.
                 </p>
               </div>
             </div>
