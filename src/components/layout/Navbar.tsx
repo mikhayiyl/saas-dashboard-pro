@@ -2,19 +2,19 @@ import { Bell, Menu, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { useAuth } from "@/hooks/useAuth";
-import { getUserProfile } from "@/services/userService";
 import {
   markAllNotificationsAsRead,
   markNotificationAsRead,
   subscribeToNotifications,
 } from "@/services/notificationService";
-import type { Notification } from "@/types/database";
+import type { Notification, UserProfile } from "@/types/database";
 
 type NavbarProps = {
   onMenuClick: () => void;
+  profile: UserProfile | null;
 };
 
-function Navbar({ onMenuClick }: NavbarProps) {
+function Navbar({ onMenuClick, profile }: NavbarProps) {
   const { user } = useAuth();
 
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -22,31 +22,14 @@ function Navbar({ onMenuClick }: NavbarProps) {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
 
   useEffect(() => {
-    if (!user) return;
-    const id = user.uid;
-    let unsubscribe: (() => void) | undefined;
+    if (!profile) return;
 
-    async function loadNotifications() {
-      try {
-        const profile = await getUserProfile(id);
+    return subscribeToNotifications(profile.workspaceId, (data) => {
+      setNotifications(data.slice(0, 10));
+    });
+  }, [profile]);
 
-        if (!profile) {
-          throw new Error("User profile not found.");
-        }
-        unsubscribe = subscribeToNotifications(profile.workspaceId, (data) => {
-          setNotifications(data.slice(0, 10));
-        });
-      } catch (error) {
-        console.error("Failed to load notifications:", error);
-      }
-    }
-
-    loadNotifications();
-
-    return () => {
-      unsubscribe?.();
-    };
-  }, [user]);
+  const displayName = profile?.name ?? user?.displayName ?? "User";
 
   const unreadCount = notifications.filter(
     (notification) => !notification.read,
@@ -103,10 +86,6 @@ function Navbar({ onMenuClick }: NavbarProps) {
                   <button
                     type="button"
                     onClick={async () => {
-                      if (!user) return;
-
-                      const profile = await getUserProfile(user.uid);
-
                       if (!profile) return;
 
                       await markAllNotificationsAsRead(
@@ -132,11 +111,7 @@ function Navbar({ onMenuClick }: NavbarProps) {
                       key={notification.id}
                       type="button"
                       onClick={async () => {
-                        if (!user || notification.read) return;
-
-                        const profile = await getUserProfile(user.uid);
-
-                        if (!profile) return;
+                        if (!profile || notification.read) return;
 
                         await markNotificationAsRead(
                           profile.workspaceId,
@@ -179,12 +154,10 @@ function Navbar({ onMenuClick }: NavbarProps) {
         </div>
         <div className="flex items-center gap-3">
           <div className="flex size-8 items-center justify-center rounded-full bg-white/10 text-xs font-medium">
-            {user?.displayName?.charAt(0).toUpperCase()}
+            {displayName.trim().charAt(0).toUpperCase() || "U"}
           </div>
 
-          <span className="text-sm font-medium">
-            {user?.displayName || "User"}
-          </span>
+          <span className="text-sm font-medium">{displayName}</span>
         </div>
       </div>
     </header>

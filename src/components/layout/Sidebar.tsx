@@ -10,10 +10,13 @@ import {
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { logoutUser } from "../../services/authService";
+import { useAuth } from "@/hooks/useAuth";
+import type { UserProfile } from "@/types/database";
 
 type SidebarProps = {
   open: boolean;
   onClose: () => void;
+  profile: UserProfile | null;
 };
 
 const mainNavigation = [
@@ -52,7 +55,15 @@ const analyticsNavigation = [
   },
 ];
 
-function Sidebar({ open, onClose }: SidebarProps) {
+function Sidebar({ open, onClose, profile }: SidebarProps) {
+  const { user } = useAuth();
+  const displayName = profile?.name ?? user?.displayName ?? "User";
+  const roleName = profile?.role
+    ? profile.role === "admin"
+      ? "Administrator"
+      : "Staff"
+    : "Account";
+
   async function handleLogout() {
     try {
       await logoutUser();
@@ -94,9 +105,17 @@ function Sidebar({ open, onClose }: SidebarProps) {
 
           {/* Navigation */}
           <nav className="flex-1 space-y-6 p-4">
-            <NavigationSection title="Main" items={mainNavigation} />
+            <NavigationSection
+              title="Main"
+              items={mainNavigation}
+              onNavigate={onClose}
+            />
 
-            <NavigationSection title="Analytics" items={analyticsNavigation} />
+            <NavigationSection
+              title="Analytics"
+              items={analyticsNavigation}
+              onNavigate={onClose}
+            />
 
             <NavigationSection
               title="System"
@@ -107,6 +126,7 @@ function Sidebar({ open, onClose }: SidebarProps) {
                   path: "/settings",
                 },
               ]}
+              onNavigate={onClose}
             />
           </nav>
 
@@ -114,12 +134,12 @@ function Sidebar({ open, onClose }: SidebarProps) {
           <div className="border-t border-white/10 p-4">
             <div className="flex items-center gap-3 rounded-lg p-2">
               <div className="flex size-9 items-center justify-center rounded-full bg-white/10 text-sm font-medium">
-                D
+                {displayName.trim().charAt(0).toUpperCase() || "U"}
               </div>
 
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium">Dancan</p>
-                <p className="truncate text-xs text-white/40">Administrator</p>
+                <p className="truncate text-sm font-medium">{displayName}</p>
+                <p className="truncate text-xs text-white/40">{roleName}</p>
               </div>
             </div>
 
@@ -147,9 +167,14 @@ type NavigationItem = {
 type NavigationSectionProps = {
   title: string;
   items: NavigationItem[];
+  onNavigate: () => void;
 };
 
-function NavigationSection({ title, items }: NavigationSectionProps) {
+function NavigationSection({
+  title,
+  items,
+  onNavigate,
+}: NavigationSectionProps) {
   return (
     <div>
       <p className="mb-2 px-3 text-xs font-medium uppercase tracking-wider text-white/40">
@@ -164,6 +189,7 @@ function NavigationSection({ title, items }: NavigationSectionProps) {
             <NavLink
               key={item.name}
               to={item.path}
+              onClick={onNavigate}
               className={({ isActive }) =>
                 [
                   "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition",
