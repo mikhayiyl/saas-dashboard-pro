@@ -101,7 +101,7 @@ function Dashboard() {
     <div className="space-y-8">
       {/* Header */}
 
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
           <p className="mt-1 text-sm text-white/40">
@@ -114,7 +114,7 @@ function Dashboard() {
           onChange={(event) =>
             setDateRange(event.target.value as DashboardDateRange)
           }
-          className="rounded-lg border border-white/10 bg-[#0C0D0F] px-3 py-2 text-sm text-white outline-none transition focus:border-white/20"
+          className="w-full rounded-lg border border-white/10 bg-[#0C0D0F] px-3 py-2 text-sm text-white outline-none transition focus:border-white/20 sm:w-auto"
         >
           <option value="7d">Last 7 days</option>
           <option value="30d">Last 30 days</option>

@@ -35,26 +35,26 @@ function Navbar({ onMenuClick, profile }: NavbarProps) {
     (notification) => !notification.read,
   ).length;
   return (
-    <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b border-white/10 bg-[#08090A]/80 px-6 backdrop-blur">
+    <header className="sticky top-0 z-10 flex h-16 items-center gap-3 border-b border-white/10 bg-[#08090A]/80 px-3 backdrop-blur sm:px-6">
       <button
         onClick={onMenuClick}
-        className="rounded-lg p-2 text-white/60 transition hover:bg-white/5 hover:text-white md:hidden"
+        className="shrink-0 rounded-lg p-2 text-white/60 transition hover:bg-white/5 hover:text-white md:hidden"
         aria-label="Open navigation"
       >
         <Menu className="size-5" />
       </button>
       {/* Search */}
-      <div className="flex items-center gap-3 text-white/40">
+      <div className="flex min-w-0 flex-1 items-center gap-2 text-white/40">
         <Search className="size-4" />
         <input
           type="text"
           placeholder="Search..."
-          className="w-40 sm:w-64 bg-transparent text-sm text-white outline-none placeholder:text-white/30"
+          className="w-full min-w-0 bg-transparent text-sm text-white outline-none placeholder:text-white/30 sm:w-64"
         />
       </div>
 
       {/* Right side */}
-      <div className="flex items-center gap-4">
+      <div className="flex shrink-0 items-center gap-2 sm:gap-4">
         <div className="relative">
           <button
             type="button"
@@ -70,7 +70,7 @@ function Navbar({ onMenuClick, profile }: NavbarProps) {
             )}
           </button>
           {isNotificationOpen && (
-            <div className="absolute right-0 top-11 z-50 w-80 overflow-hidden rounded-xl border border-white/10 bg-[#0C0D0F] shadow-2xl">
+            <div className="absolute right-0 top-11 z-50 w-[min(20rem,calc(100vw-1.5rem))] overflow-hidden rounded-xl border border-white/10 bg-[#0C0D0F] shadow-2xl">
               <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
                 <div>
                   <h3 className="text-sm font-semibold text-white">
@@ -152,12 +152,14 @@ function Navbar({ onMenuClick, profile }: NavbarProps) {
             </div>
           )}
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex min-w-0 items-center gap-3">
           <div className="flex size-8 items-center justify-center rounded-full bg-white/10 text-xs font-medium">
             {displayName.trim().charAt(0).toUpperCase() || "U"}
           </div>
 
-          <span className="text-sm font-medium">{displayName}</span>
+          <span className="hidden max-w-40 truncate text-sm font-medium sm:block">
+            {displayName}
+          </span>
         </div>
       </div>
     </header>
