@@ -94,13 +94,21 @@ function Sidebar({ open, onClose, profile }: SidebarProps) {
         <div className="flex h-full flex-col">
           {/* Logo */}
           <div className="flex h-16 items-center border-b border-white/10 px-6">
-            <div className="flex items-center gap-2">
-              <div className="flex size-8 items-center justify-center rounded-lg bg-white text-sm font-bold text-black">
-                N
-              </div>
-
-              <span className="text-lg font-semibold tracking-tight">NOVA</span>
-            </div>
+            <NavLink
+              to="/dashboard"
+              onClick={onClose}
+              aria-label="SimplizerPro dashboard"
+              className="flex items-center gap-2 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+            >
+              <img
+                src="/simplizerpro-logo.png"
+                alt=""
+                className="size-8 shrink-0 rounded-lg object-contain"
+              />
+              <span className="text-lg font-semibold tracking-tight">
+                SimplizerPro
+              </span>
+            </NavLink>
           </div>
 
           {/* Navigation */}
