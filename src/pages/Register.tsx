@@ -22,12 +22,16 @@ function Register() {
     setServerError("");
 
     try {
-      await registerUser(data.email, data.password);
+      await registerUser(data.name, data.email, data.password);
 
       navigate("/dashboard");
     } catch (error) {
       console.error(error);
-      setServerError("Unable to create your account. Please try again.");
+      setServerError(
+        error instanceof Error
+          ? error.message
+          : "Unable to create your account. Please try again.",
+      );
     }
   };
 
@@ -55,6 +59,31 @@ function Register() {
         {/* Form Card */}
         <div className="rounded-xl border border-white/10 bg-[#0C0D0F] p-6 shadow-xl">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+            {/* Name */}
+            <div>
+              <label
+                htmlFor="name"
+                className="mb-2 block text-sm font-medium text-white/70"
+              >
+                Name
+              </label>
+
+              <input
+                id="name"
+                type="text"
+                autoComplete="name"
+                placeholder="Your name"
+                {...register("name")}
+                className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-white/30 focus:ring-1 focus:ring-white/10"
+              />
+
+              {errors.name && (
+                <p className="mt-1.5 text-sm text-red-400">
+                  {errors.name.message}
+                </p>
+              )}
+            </div>
+
             {/* Email */}
             <div>
               <label
