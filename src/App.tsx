@@ -1,7 +1,8 @@
 import { lazy, Suspense } from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Outlet, Route, Routes } from "react-router-dom";
 import AppLayout from "./components/layout/AppLayout";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
+import { useAuth } from "./hooks/useAuth";
 import useMetrics from "./hooks/useMetrics";
 
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -18,6 +19,24 @@ function AIInsightsRoute() {
   const { metrics } = useMetrics();
 
   return <AIInsights metrics={metrics} />;
+}
+
+function GuestOnlyRoute() {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#08090A] text-white">
+        <p className="text-sm text-white/50">Loading...</p>
+      </div>
+    );
+  }
+
+  if (user) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return <Outlet />;
 }
 
 function App() {
@@ -42,8 +61,10 @@ function App() {
           </Route>
         </Route>
 
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+        <Route element={<GuestOnlyRoute />}>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+        </Route>
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </Suspense>
