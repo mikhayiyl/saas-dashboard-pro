@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
 import { useAuth } from "../hooks/useAuth";
 import { getUserProfile } from "../services/userService";
@@ -12,6 +13,7 @@ import ConfirmDeleteModal from "@/components/common/ConfirmDeleteModal";
 
 function Customers() {
   const { user } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
@@ -24,7 +26,7 @@ function Customers() {
   const [deletingCustomerId, setDeletingCustomerId] = useState<string | null>(
     null,
   );
-  const [search, setSearch] = useState("");
+  const search = searchParams.get("search") ?? "";
   const [statusFilter, setStatusFilter] = useState("all");
 
   useEffect(() => {
@@ -65,7 +67,8 @@ function Customers() {
 
     const matchesSearch =
       customer.name.toLowerCase().includes(searchTerm) ||
-      customer.email.toLowerCase().includes(searchTerm);
+      customer.email.toLowerCase().includes(searchTerm) ||
+      customer.phone.toLowerCase().includes(searchTerm);
 
     const matchesStatus =
       statusFilter === "all" || customer.status === statusFilter;
@@ -164,7 +167,17 @@ function Customers() {
         <input
           type="text"
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(event) =>
+            setSearchParams(
+              (current) => {
+                const next = new URLSearchParams(current);
+                if (event.target.value) next.set("search", event.target.value);
+                else next.delete("search");
+                return next;
+              },
+              { replace: true },
+            )
+          }
           placeholder="Search customers..."
           className="w-full rounded-lg border border-white/10 bg-[#0C0D0F] px-4 py-2.5 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-white/20 sm:max-w-sm"
         />

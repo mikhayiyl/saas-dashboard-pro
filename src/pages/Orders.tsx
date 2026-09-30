@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { useSearchParams } from "react-router-dom";
 
 import {
   Dialog,
@@ -22,6 +23,7 @@ import ConfirmDeleteModal from "@/components/common/ConfirmDeleteModal";
 
 function Orders() {
   const { user } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [orders, setOrders] = useState<Order[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -31,6 +33,7 @@ function Orders() {
   const [workspaceId, setWorkspaceId] = useState("");
   const [orderToDelete, setOrderToDelete] = useState<Order | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const search = searchParams.get("search") ?? "";
 
   useEffect(() => {
     if (!user) return;
@@ -94,6 +97,24 @@ function Orders() {
   const customerMap = new Map(
     customers.map((customer) => [customer.id, customer.name]),
   );
+  const customerEmailMap = new Map(
+    customers.map((customer) => [customer.id, customer.email]),
+  );
+  const filteredOrders = orders.filter((order) => {
+    const term = search.toLowerCase();
+    const searchableText = [
+      order.id,
+      order.status,
+      customerMap.get(order.customerId),
+      customerEmailMap.get(order.customerId),
+      ...order.items.map((item) => item.name),
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+
+    return searchableText.includes(term);
+  });
 
   async function handleStatusChange(orderId: string, status: Order["status"]) {
     if (!workspaceId) return;
@@ -172,6 +193,25 @@ function Orders() {
         </button>
       </div>
 
+      <input
+        type="search"
+        value={search}
+        onChange={(event) =>
+          setSearchParams(
+            (current) => {
+              const next = new URLSearchParams(current);
+              if (event.target.value) next.set("search", event.target.value);
+              else next.delete("search");
+              return next;
+            },
+            { replace: true },
+          )
+        }
+        placeholder="Search orders, customers, items..."
+        aria-label="Search orders"
+        className="w-full rounded-lg border border-white/10 bg-[#0C0D0F] px-4 py-2.5 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-white/20 sm:max-w-sm"
+      />
+
       {/* Orders table */}
       <div className="overflow-x-auto rounded-xl border border-white/10 bg-[#0C0D0F]">
         <table className="w-full min-w-225 text-sm">
@@ -194,7 +234,7 @@ function Orders() {
           </thead>
 
           <tbody>
-            {orders.map((order) => (
+            {filteredOrders.map((order) => (
               <tr
                 key={order.id}
                 className="border-b border-white/5 last:border-0"
@@ -282,6 +322,16 @@ function Orders() {
                 </td>
               </tr>
             ))}
+            {filteredOrders.length === 0 && (
+              <tr>
+                <td
+                  colSpan={7}
+                  className="px-6 py-12 text-center text-sm text-white/45"
+                >
+                  No matching orders.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

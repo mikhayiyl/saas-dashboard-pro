@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
 import { useAuth } from "../hooks/useAuth";
 import { deleteProduct, subscribeToProducts } from "../services/productService";
@@ -33,6 +34,7 @@ function getStockStatus(stock: number) {
 
 function Products() {
   const { user } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -43,7 +45,7 @@ function Products() {
     null,
   );
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
-  const [search, setSearch] = useState("");
+  const search = searchParams.get("search") ?? "";
   const [categoryFilter, setCategoryFilter] = useState("all");
 
   useEffect(() => {
@@ -87,7 +89,7 @@ function Products() {
   ).sort();
 
   const filteredProducts = products.filter((product) => {
-    const matchesSearch = product.name
+    const matchesSearch = `${product.name} ${product.category}`
       .toLowerCase()
       .includes(search.toLowerCase());
 
@@ -174,7 +176,18 @@ function Products() {
           <input
             type="text"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(event) =>
+              setSearchParams(
+                (current) => {
+                  const next = new URLSearchParams(current);
+                  if (event.target.value)
+                    next.set("search", event.target.value);
+                  else next.delete("search");
+                  return next;
+                },
+                { replace: true },
+              )
+            }
             placeholder="Search products..."
             className="w-full rounded-lg border border-white/10 bg-[#0C0D0F] px-4 py-2.5 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-white/20"
           />
