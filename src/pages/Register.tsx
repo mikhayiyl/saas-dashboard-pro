@@ -26,7 +26,6 @@ function Register() {
 
       navigate("/dashboard");
     } catch (error) {
-      console.error(error);
       setServerError(
         error instanceof Error
           ? error.message
