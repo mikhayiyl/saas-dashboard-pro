@@ -92,22 +92,22 @@ function LiveActivity() {
     };
   }, [user]);
   return (
-    <div className="rounded-xl border border-white/10 bg-[#0C0D0F] p-5">
+    <div className="dashboard-panel rounded-2xl border border-white/[0.07] bg-[#0e1726]/90 p-5 sm:p-6">
       <div className="mb-6">
         <div className="flex items-center gap-2">
-          <h2 className="font-semibold">Live Activity</h2>
+          <h2 className="text-[15px] font-semibold">Live Activity</h2>
 
           <span className="size-2 rounded-full bg-emerald-400" />
         </div>
 
-        <p className="mt-1 text-sm text-white/40">
-          Recent activity across your business
+        <p className="mt-1 text-[13px] text-slate-500">
+          The latest updates across your workspace
         </p>
       </div>
 
       <div className="space-y-1">
         {activities.length === 0 ? (
-          <p className="px-3 py-6 text-center text-sm text-white/30">
+          <p className="px-3 py-6 text-center text-sm text-slate-500">
             No recent activity
           </p>
         ) : (
@@ -117,10 +117,10 @@ function LiveActivity() {
             return (
               <div
                 key={activity.id}
-                className="flex items-center gap-4 rounded-lg px-3 py-3 transition hover:bg-white/5"
+                className="flex items-center gap-4 rounded-xl px-3 py-3 transition hover:bg-white/[0.035]"
               >
-                <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-white/5">
-                  <Icon className="size-4 text-white/60" />
+                <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-white/[0.05]">
+                  <Icon className="size-4 text-slate-300" />
                 </div>
 
                 <div className="min-w-0 flex-1">
@@ -128,12 +128,12 @@ function LiveActivity() {
                     {getActivityTitle(activity)}
                   </p>
 
-                  <p className="mt-0.5 truncate text-sm text-white/40">
+                  <p className="mt-0.5 truncate text-sm text-slate-400">
                     {activity.message}
                   </p>
                 </div>
 
-                <span className="shrink-0 text-xs text-white/30">
+                <span className="shrink-0 text-xs text-slate-500">
                   {formatRelativeTime(activity.timestamp)}
                 </span>
               </div>

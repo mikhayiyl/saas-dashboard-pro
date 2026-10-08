@@ -53,7 +53,6 @@ const Settings = () => {
         setLoading(true);
 
         await user.reload();
-        console.log("Firebase Auth email:", user.email);
 
         const authEmail = user.email;
 

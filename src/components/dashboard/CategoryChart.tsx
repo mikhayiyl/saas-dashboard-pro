@@ -14,7 +14,7 @@ type CategoryChartProps = {
   }[];
 };
 
-const categoryColors = ["#8B5CF6", "#0EA5E9", "#10B981", "#F59E0B", "#F43F5E"];
+const categoryColors = ["#7894ff", "#b7a5ff", "#87cfff", "#ffd08c", "#ff9ba9"];
 
 function CategoryChart({ data }: CategoryChartProps) {
   const totalRevenue = data.reduce((sum, item) => sum + item.revenue, 0);
@@ -34,18 +34,18 @@ function CategoryChart({ data }: CategoryChartProps) {
   };
 
   return (
-    <div className="rounded-xl border border-white/8 bg-[#0C0D0F] p-4">
+    <div className="dashboard-panel rounded-2xl border border-white/[0.07] bg-[#0e1726]/90 p-5 sm:p-6">
       {/* Header */}
       <div className="mb-4">
-        <h2 className="text-base font-semibold tracking-tight text-white">
+        <h2 className="text-[15px] font-semibold tracking-tight text-white">
           Sales by Category
         </h2>
 
-        <p className="mt-1 text-xs text-white/40">Revenue distribution</p>
+        <p className="mt-1 text-[13px] text-slate-500">Revenue distribution</p>
       </div>
 
       {/* Donut */}
-      <div className="h-55">
+      <div className="h-52">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
@@ -64,12 +64,13 @@ function CategoryChart({ data }: CategoryChartProps) {
             <Tooltip
               cursor={false}
               contentStyle={{
-                backgroundColor: "#151619",
-                border: "1px solid rgba(255,255,255,0.1)",
-                borderRadius: "8px",
+                backgroundColor: "#121f38",
+                border: "1px solid rgba(164,181,220,0.2)",
+                borderRadius: "12px",
                 padding: "8px 10px",
                 fontSize: "12px",
-                boxShadow: "0 10px 30px rgba(0,0,0,0.35)",
+                color: "#e6edfb",
+                boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
               }}
               formatter={(value) => [
                 `$${Number(value).toLocaleString()}`,
@@ -96,12 +97,12 @@ function CategoryChart({ data }: CategoryChartProps) {
                 }}
               />
 
-              <span className="truncate text-xs text-white/55">
+              <span className="truncate text-[13px] text-[#738096]">
                 {item.category}
               </span>
             </div>
 
-            <span className="ml-3 text-xs font-semibold text-white/85">
+            <span className="ml-3 text-[13px] font-semibold text-[#34435a]">
               {item.percentage}%
             </span>
           </div>

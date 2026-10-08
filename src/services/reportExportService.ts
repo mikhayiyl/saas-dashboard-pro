@@ -1,4 +1,43 @@
 type ReportDateRange = "7" | "30" | "90" | "all";
+type ExcelModule = typeof import("xlsx");
+type PdfModule = typeof import("jspdf");
+
+let excelModule: ExcelModule | undefined;
+let pdfModule: PdfModule | undefined;
+let excelModulePromise: Promise<ExcelModule> | undefined;
+let pdfModulePromise: Promise<PdfModule> | undefined;
+
+function loadExcelModule() {
+  excelModulePromise ??= import("xlsx")
+    .then((module) => {
+      excelModule = module;
+      return module;
+    })
+    .catch((error: unknown) => {
+      excelModulePromise = undefined;
+      throw error;
+    });
+
+  return excelModulePromise;
+}
+
+function loadPdfModule() {
+  pdfModulePromise ??= import("jspdf")
+    .then((module) => {
+      pdfModule = module;
+      return module;
+    })
+    .catch((error: unknown) => {
+      pdfModulePromise = undefined;
+      throw error;
+    });
+
+  return pdfModulePromise;
+}
+
+export async function preloadReportExportLibraries() {
+  await Promise.all([loadExcelModule(), loadPdfModule()]);
+}
 
 type ReportExportData = {
   dateRange: ReportDateRange;
@@ -66,8 +105,12 @@ function getFileDate() {
   return new Date().toISOString().slice(0, 10);
 }
 
-export async function exportReportToExcel(data: ReportExportData) {
-  const XLSX = await import("xlsx");
+export function exportReportToExcel(data: ReportExportData) {
+  if (!excelModule) {
+    throw new Error("Excel export is not ready yet.");
+  }
+
+  const XLSX = excelModule;
   const workbook = XLSX.utils.book_new();
 
   const periodLabel = getDateRangeLabel(data.dateRange);
@@ -153,8 +196,12 @@ export async function exportReportToExcel(data: ReportExportData) {
   XLSX.writeFileXLSX(workbook, `business-report-${getFileDate()}.xlsx`);
 }
 
-export async function exportReportToPDF(data: ReportExportData) {
-  const { jsPDF } = await import("jspdf");
+export function exportReportToPDF(data: ReportExportData) {
+  if (!pdfModule) {
+    throw new Error("PDF export is not ready yet.");
+  }
+
+  const { jsPDF } = pdfModule;
   const doc = new jsPDF();
 
   const pageWidth = doc.internal.pageSize.getWidth();

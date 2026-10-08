@@ -140,7 +140,7 @@ function AIInsights({ metrics }: AIInsightsProps) {
 
   if (!metrics) {
     return (
-      <div className="space-y-6">
+      <div className="ai-insights-page space-y-6">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">AI Insights</h1>
 
@@ -159,7 +159,7 @@ function AIInsights({ metrics }: AIInsightsProps) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="ai-insights-page space-y-6">
       {/* Header */}
       <div>
         <div className="flex items-center gap-2">

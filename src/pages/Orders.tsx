@@ -279,28 +279,28 @@ function Orders() {
                   >
                     <option
                       value="pending"
-                      className="bg-[#0C0D0F] text-amber-400"
+                      className="bg-popover text-amber-400"
                     >
                       Pending
                     </option>
 
                     <option
                       value="processing"
-                      className="bg-[#0C0D0F] text-blue-400"
+                      className="bg-popover text-blue-400"
                     >
                       Processing
                     </option>
 
                     <option
                       value="completed"
-                      className="bg-[#0C0D0F] text-emerald-400"
+                      className="bg-popover text-emerald-400"
                     >
                       Completed
                     </option>
 
                     <option
                       value="cancelled"
-                      className="bg-[#0C0D0F] text-red-400"
+                      className="bg-popover text-red-400"
                     >
                       Cancelled
                     </option>
@@ -338,9 +338,9 @@ function Orders() {
 
       {/* Create Order Dialog */}
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-        <DialogContent className="border-white/10 bg-[#0C0D0F] text-white sm:max-w-2xl">
+        <DialogContent className="border-border bg-popover text-popover-foreground sm:max-w-2xl">
           <DialogHeader>
-            <DialogTitle className="text-white">Create Order</DialogTitle>
+            <DialogTitle>Create Order</DialogTitle>
           </DialogHeader>
 
           <OrderForm

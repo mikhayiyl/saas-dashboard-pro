@@ -9,12 +9,32 @@ import type { UserProfile } from "@/types/database";
 function AppLayout() {
   const { user } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [theme, setTheme] = useState<"dark" | "light">(() => {
+    try {
+      return window.localStorage.getItem("simplizerpro-theme") === "light"
+        ? "light"
+        : "dark";
+    } catch (error) {
+      console.error("Failed to read the saved workspace theme:", error);
+      return "dark";
+    }
+  });
   const [profileState, setProfileState] = useState<{
     uid: string;
     profile: UserProfile | null;
   }>({ uid: "", profile: null });
 
   const profile = user?.uid === profileState.uid ? profileState.profile : null;
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+
+    try {
+      window.localStorage.setItem("simplizerpro-theme", theme);
+    } catch (error) {
+      console.error("Failed to save the workspace theme:", error);
+    }
+  }, [theme]);
 
   useEffect(() => {
     if (!user) return;
@@ -37,17 +57,29 @@ function AppLayout() {
   }, [user]);
 
   return (
-    <div className="min-h-screen bg-[#08090A] text-[#F5F5F5]">
+    <div
+      className="workspace-theme min-h-screen bg-[#0d1628] text-[#edf2fc]"
+      data-theme={theme}
+    >
       <Sidebar
         open={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
         profile={profile}
       />
 
-      <div className="md:ml-64">
-        <Navbar onMenuClick={() => setSidebarOpen(true)} profile={profile} />
+      <div className="min-h-screen md:ml-[260px]">
+        <Navbar
+          onMenuClick={() => setSidebarOpen(true)}
+          profile={profile}
+          theme={theme}
+          onToggleTheme={() =>
+            setTheme((currentTheme) =>
+              currentTheme === "dark" ? "light" : "dark",
+            )
+          }
+        />
 
-        <main className="p-4 sm:p-6">
+        <main className="px-4 py-6 sm:px-6 sm:py-8 xl:px-9">
           <Outlet />
         </main>
       </div>

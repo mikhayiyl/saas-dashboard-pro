@@ -28,15 +28,15 @@ function ConfirmDeleteModal({
 }: ConfirmDeleteModalProps) {
   return (
     <AlertDialog open={open} onOpenChange={(isOpen) => !isOpen && onCancel()}>
-      <AlertDialogContent className="border-white/10 bg-[#0C0D0F]">
+      <AlertDialogContent className="border-[#e5eaf1] bg-white">
         <AlertDialogHeader>
-          <AlertDialogTitle className="text-white">
+          <AlertDialogTitle className="text-[#182840]">
             Delete {itemType}?
           </AlertDialogTitle>
 
-          <AlertDialogDescription className="text-white/50">
+          <AlertDialogDescription className="text-[#738096]">
             Are you sure you want to delete{" "}
-            <span className="font-medium text-white">{itemName}</span>?
+            <span className="font-medium text-[#182840]">{itemName}</span>?
             <br />
             This action cannot be undone.
           </AlertDialogDescription>
@@ -45,7 +45,7 @@ function ConfirmDeleteModal({
         <AlertDialogFooter>
           <AlertDialogCancel
             disabled={isDeleting}
-            className="border-white/10 bg-transparent text-white/70 hover:bg-white/5 hover:text-white"
+            className="border-[#dfe5ee] bg-white text-[#526178] hover:bg-[#f5f7fb] hover:text-[#182840]"
           >
             Cancel
           </AlertDialogCancel>

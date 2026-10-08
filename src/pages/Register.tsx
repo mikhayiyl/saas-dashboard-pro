@@ -2,13 +2,24 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  ArrowRight,
+  Eye,
+  EyeOff,
+  LockKeyhole,
+  Mail,
+  UserRound,
+} from "lucide-react";
 
 import { registerUser } from "../services/authService";
 import { registerSchema, type RegisterFormData } from "../schemas/authSchema";
+import AuthShell from "@/components/auth/AuthShell";
 
 function Register() {
   const navigate = useNavigate();
   const [serverError, setServerError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const {
     register,
@@ -34,163 +45,186 @@ function Register() {
     }
   };
 
+  const inputClassName =
+    "h-[48px] w-full rounded-xl border border-[#dfe5ee] bg-[#f8fafd] pl-11 pr-4 text-sm text-[#142238] outline-none transition placeholder:text-[#a0aabc] hover:border-[#c8d2e0] focus:border-[#5476e8] focus:bg-white focus:ring-4 focus:ring-[#5476e8]/[0.09]";
+
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#08090A] px-4 py-8 text-white">
-      <div className="w-full max-w-md">
-        {/* Header */}
-        <div className="mb-8 text-center">
+    <AuthShell
+      title="Build your workspace"
+      description="Create your account and bring the moving parts of your business together."
+      footer={
+        <>
+          Already have an account?{" "}
           <Link
-            to="/"
-            className="text-xl font-semibold tracking-tight transition hover:text-white/80"
+            to="/login"
+            className="font-semibold text-[#345bd7] transition hover:text-[#2448bd]"
           >
-            SaaS Dashboard
+            Sign in
           </Link>
-
-          <h1 className="mt-8 text-2xl font-semibold tracking-tight">
-            Create your account
-          </h1>
-
-          <p className="mt-2 text-sm text-white/50">
-            Get started with your dashboard.
-          </p>
+        </>
+      }
+    >
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <div>
+          <label
+            htmlFor="name"
+            className="mb-2 block text-[13px] font-semibold text-[#34435a]"
+          >
+            Your name
+          </label>
+          <div className="relative">
+            <UserRound className="pointer-events-none absolute left-3.5 top-1/2 size-[17px] -translate-y-1/2 text-[#8a97aa]" />
+            <input
+              id="name"
+              type="text"
+              autoComplete="name"
+              placeholder="Alex Morgan"
+              aria-invalid={Boolean(errors.name)}
+              aria-describedby={errors.name ? "name-error" : undefined}
+              {...register("name")}
+              className={inputClassName}
+            />
+          </div>
+          {errors.name && (
+            <p id="name-error" className="mt-1.5 text-xs font-medium text-[#c34452]">
+              {errors.name.message}
+            </p>
+          )}
         </div>
 
-        {/* Form Card */}
-        <div className="rounded-xl border border-white/10 bg-[#0C0D0F] p-6 shadow-xl">
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-            {/* Name */}
-            <div>
-              <label
-                htmlFor="name"
-                className="mb-2 block text-sm font-medium text-white/70"
-              >
-                Name
-              </label>
+        <div>
+          <label
+            htmlFor="email"
+            className="mb-2 block text-[13px] font-semibold text-[#34435a]"
+          >
+            Work email
+          </label>
+          <div className="relative">
+            <Mail className="pointer-events-none absolute left-3.5 top-1/2 size-[17px] -translate-y-1/2 text-[#8a97aa]" />
+            <input
+              id="email"
+              type="email"
+              autoComplete="email"
+              placeholder="you@company.com"
+              aria-invalid={Boolean(errors.email)}
+              aria-describedby={errors.email ? "email-error" : undefined}
+              {...register("email")}
+              className={inputClassName}
+            />
+          </div>
+          {errors.email && (
+            <p id="email-error" className="mt-1.5 text-xs font-medium text-[#c34452]">
+              {errors.email.message}
+            </p>
+          )}
+        </div>
 
-              <input
-                id="name"
-                type="text"
-                autoComplete="name"
-                placeholder="Your name"
-                {...register("name")}
-                className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-white/30 focus:ring-1 focus:ring-white/10"
-              />
-
-              {errors.name && (
-                <p className="mt-1.5 text-sm text-red-400">
-                  {errors.name.message}
-                </p>
-              )}
-            </div>
-
-            {/* Email */}
-            <div>
-              <label
-                htmlFor="email"
-                className="mb-2 block text-sm font-medium text-white/70"
-              >
-                Email
-              </label>
-
-              <input
-                id="email"
-                type="email"
-                autoComplete="email"
-                placeholder="you@example.com"
-                {...register("email")}
-                className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-white/30 focus:ring-1 focus:ring-white/10"
-              />
-
-              {errors.email && (
-                <p className="mt-1.5 text-sm text-red-400">
-                  {errors.email.message}
-                </p>
-              )}
-            </div>
-
-            {/* Password */}
-            <div>
-              <label
-                htmlFor="password"
-                className="mb-2 block text-sm font-medium text-white/70"
-              >
-                Password
-              </label>
-
-              <input
-                id="password"
-                type="password"
-                autoComplete="new-password"
-                placeholder="••••••••"
-                {...register("password")}
-                className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-white/30 focus:ring-1 focus:ring-white/10"
-              />
-
-              {errors.password && (
-                <p className="mt-1.5 text-sm text-red-400">
-                  {errors.password.message}
-                </p>
-              )}
-            </div>
-
-            {/* Confirm Password */}
-            <div>
-              <label
-                htmlFor="confirmPassword"
-                className="mb-2 block text-sm font-medium text-white/70"
-              >
-                Confirm password
-              </label>
-
-              <input
-                id="confirmPassword"
-                type="password"
-                autoComplete="new-password"
-                placeholder="••••••••"
-                {...register("confirmPassword")}
-                className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-white/30 focus:ring-1 focus:ring-white/10"
-              />
-
-              {errors.confirmPassword && (
-                <p className="mt-1.5 text-sm text-red-400">
-                  {errors.confirmPassword.message}
-                </p>
-              )}
-            </div>
-
-            {/* Firebase Error */}
-            {serverError && (
-              <div
-                role="alert"
-                className="rounded-lg border border-red-400/20 bg-red-400/10 px-3 py-2.5 text-sm text-red-400"
-              >
-                {serverError}
-              </div>
-            )}
-
-            {/* Submit */}
+        <div>
+          <label
+            htmlFor="password"
+            className="mb-2 block text-[13px] font-semibold text-[#34435a]"
+          >
+            Create password
+          </label>
+          <div className="relative">
+            <LockKeyhole className="pointer-events-none absolute left-3.5 top-1/2 size-[17px] -translate-y-1/2 text-[#8a97aa]" />
+            <input
+              id="password"
+              type={showPassword ? "text" : "password"}
+              autoComplete="new-password"
+              placeholder="At least 6 characters"
+              aria-invalid={Boolean(errors.password)}
+              aria-describedby={errors.password ? "password-error" : undefined}
+              {...register("password")}
+              className={`${inputClassName} pr-12`}
+            />
             <button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full rounded-lg bg-white px-4 py-2.5 text-sm font-medium text-black transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-50"
+              type="button"
+              onClick={() => setShowPassword((visible) => !visible)}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-[#8794a8] transition hover:text-[#34435a] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5476e8]"
             >
-              {isSubmitting ? "Creating account..." : "Create account"}
+              {showPassword ? (
+                <EyeOff className="size-4" />
+              ) : (
+                <Eye className="size-4" />
+              )}
             </button>
-          </form>
-
-          {/* Login Link */}
-          <p className="mt-6 text-center text-sm text-white/50">
-            Already have an account?{" "}
-            <Link
-              to="/login"
-              className="font-medium text-white transition hover:text-white/70"
-            >
-              Sign in
-            </Link>
-          </p>
+          </div>
+          {errors.password && (
+            <p id="password-error" className="mt-1.5 text-xs font-medium text-[#c34452]">
+              {errors.password.message}
+            </p>
+          )}
         </div>
-      </div>
-    </main>
+
+        <div>
+          <label
+            htmlFor="confirmPassword"
+            className="mb-2 block text-[13px] font-semibold text-[#34435a]"
+          >
+            Confirm password
+          </label>
+          <div className="relative">
+            <LockKeyhole className="pointer-events-none absolute left-3.5 top-1/2 size-[17px] -translate-y-1/2 text-[#8a97aa]" />
+            <input
+              id="confirmPassword"
+              type={showConfirmPassword ? "text" : "password"}
+              autoComplete="new-password"
+              placeholder="Enter your password again"
+              aria-invalid={Boolean(errors.confirmPassword)}
+              aria-describedby={
+                errors.confirmPassword ? "confirm-password-error" : undefined
+              }
+              {...register("confirmPassword")}
+              className={`${inputClassName} pr-12`}
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword((visible) => !visible)}
+              aria-label={
+                showConfirmPassword ? "Hide confirmation" : "Show confirmation"
+              }
+              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-[#8794a8] transition hover:text-[#34435a] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5476e8]"
+            >
+              {showConfirmPassword ? (
+                <EyeOff className="size-4" />
+              ) : (
+                <Eye className="size-4" />
+              )}
+            </button>
+          </div>
+          {errors.confirmPassword && (
+            <p
+              id="confirm-password-error"
+              className="mt-1.5 text-xs font-medium text-[#c34452]"
+            >
+              {errors.confirmPassword.message}
+            </p>
+          )}
+        </div>
+
+        {serverError && (
+          <div
+            role="alert"
+            className="rounded-xl border border-[#f1c8cc] bg-[#fff5f5] px-3.5 py-3 text-sm text-[#a83240]"
+          >
+            {serverError}
+          </div>
+        )}
+
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="group flex h-[50px] w-full items-center justify-center gap-2 rounded-xl bg-[#345bd7] px-4 text-sm font-semibold text-white shadow-[0_8px_18px_-8px_rgba(52,91,215,0.72)] transition hover:bg-[#294fc9] hover:shadow-[0_10px_22px_-8px_rgba(52,91,215,0.8)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#5476e8]/25 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {isSubmitting ? "Creating account..." : "Create your workspace"}
+          {!isSubmitting && (
+            <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+          )}
+        </button>
+      </form>
+    </AuthShell>
   );
 }
 

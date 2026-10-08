@@ -102,13 +102,13 @@ function ProductForm({
   }
 
   return (
-    <div className="rounded-xl border border-white/10 bg-[#0C0D0F] p-6">
+    <div className="rounded-xl border border-[#e5eaf1] bg-white p-6">
       <div className="mb-6">
         <h2 className="text-lg font-semibold">
           {isEditMode ? "Edit Product" : "Add Product"}
         </h2>
 
-        <p className="mt-1 text-sm text-white/50">
+        <p className="mt-1 text-sm text-[#738096]">
           {isEditMode
             ? "Update the product information below."
             : "Add a new product to your inventory."}
@@ -118,7 +118,7 @@ function ProductForm({
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         <div className="grid gap-5 sm:grid-cols-2">
           <div className="space-y-2">
-            <label htmlFor="name" className="text-sm font-medium text-white/80">
+            <label htmlFor="name" className="text-sm font-medium text-[#34435a]">
               Product Name
             </label>
 
@@ -127,18 +127,18 @@ function ProductForm({
               type="text"
               placeholder="e.g. Wireless Mouse"
               {...register("name")}
-              className="w-full rounded-lg border border-white/10 bg-white/3 px-3 py-2.5 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-white/20 focus:bg-white/5"
+              className="w-full rounded-lg border border-[#dfe5ee] bg-[#f8fafd] px-3 py-2.5 text-sm text-[#142238] outline-none transition placeholder:text-[#a0aabc] focus:border-[#5476e8] focus:bg-white focus:ring-4 focus:ring-[#5476e8]/[0.08]"
             />
 
             {errors.name && (
-              <p className="text-xs text-red-400">{errors.name.message}</p>
+              <p className="text-xs text-[#c34452]">{errors.name.message}</p>
             )}
           </div>
 
           <div className="space-y-2">
             <label
               htmlFor="category"
-              className="text-sm font-medium text-white/80"
+              className="text-sm font-medium text-[#34435a]"
             >
               Category
             </label>
@@ -148,18 +148,18 @@ function ProductForm({
               type="text"
               placeholder="e.g. Accessories"
               {...register("category")}
-              className="w-full rounded-lg border border-white/10 bg-white/3 px-3 py-2.5 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-white/20 focus:bg-white/5"
+              className="w-full rounded-lg border border-[#dfe5ee] bg-[#f8fafd] px-3 py-2.5 text-sm text-[#142238] outline-none transition placeholder:text-[#a0aabc] focus:border-[#5476e8] focus:bg-white focus:ring-4 focus:ring-[#5476e8]/[0.08]"
             />
 
             {errors.category && (
-              <p className="text-xs text-red-400">{errors.category.message}</p>
+              <p className="text-xs text-[#c34452]">{errors.category.message}</p>
             )}
           </div>
 
           <div className="space-y-2">
             <label
               htmlFor="price"
-              className="text-sm font-medium text-white/80"
+              className="text-sm font-medium text-[#34435a]"
             >
               Price
             </label>
@@ -171,18 +171,18 @@ function ProductForm({
               step="0.01"
               placeholder="0.00"
               {...register("price")}
-              className="w-full rounded-lg border border-white/10 bg-white/3 px-3 py-2.5 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-white/20 focus:bg-white/5"
+              className="w-full rounded-lg border border-[#dfe5ee] bg-[#f8fafd] px-3 py-2.5 text-sm text-[#142238] outline-none transition placeholder:text-[#a0aabc] focus:border-[#5476e8] focus:bg-white focus:ring-4 focus:ring-[#5476e8]/[0.08]"
             />
 
             {errors.price && (
-              <p className="text-xs text-red-400">{errors.price.message}</p>
+              <p className="text-xs text-[#c34452]">{errors.price.message}</p>
             )}
           </div>
 
           <div className="space-y-2">
             <label
               htmlFor="stock"
-              className="text-sm font-medium text-white/80"
+              className="text-sm font-medium text-[#34435a]"
             >
               Stock
             </label>
@@ -194,17 +194,17 @@ function ProductForm({
               step="1"
               placeholder="0"
               {...register("stock")}
-              className="w-full rounded-lg border border-white/10 bg-white/3 px-3 py-2.5 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-white/20 focus:bg-white/5"
+              className="w-full rounded-lg border border-[#dfe5ee] bg-[#f8fafd] px-3 py-2.5 text-sm text-[#142238] outline-none transition placeholder:text-[#a0aabc] focus:border-[#5476e8] focus:bg-white focus:ring-4 focus:ring-[#5476e8]/[0.08]"
             />
 
             {errors.stock && (
-              <p className="text-xs text-red-400">{errors.stock.message}</p>
+              <p className="text-xs text-[#c34452]">{errors.stock.message}</p>
             )}
           </div>
         </div>
 
         {submitError && (
-          <p className="rounded-lg border border-red-500/20 bg-red-500/5 px-3 py-2.5 text-sm text-red-400">
+          <p className="rounded-lg border border-[#f1c8cc] bg-[#fff5f5] px-3 py-2.5 text-sm text-[#a83240]">
             {submitError}
           </p>
         )}
@@ -214,7 +214,7 @@ function ProductForm({
             type="button"
             onClick={onCancel}
             disabled={isSubmitting}
-            className="rounded-lg border border-white/10 px-4 py-2.5 text-sm font-medium text-white/70 transition hover:bg-white/5 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-lg border border-[#dfe5ee] px-4 py-2.5 text-sm font-medium text-[#526178] transition hover:bg-[#f5f7fb] hover:text-[#182840] disabled:cursor-not-allowed disabled:opacity-50"
           >
             Cancel
           </button>
@@ -222,7 +222,7 @@ function ProductForm({
           <button
             type="submit"
             disabled={isSubmitting}
-            className="rounded-lg bg-white px-4 py-2.5 text-sm font-medium text-black transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-lg bg-[#345bd7] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#294fc9] disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isSubmitting
               ? isEditMode

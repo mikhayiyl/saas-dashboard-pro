@@ -1,5 +1,6 @@
 import {
   BarChart3,
+  Boxes,
   LayoutDashboard,
   LogOut,
   Package,
@@ -83,36 +84,36 @@ function Sidebar({ open, onClose, profile }: SidebarProps) {
         />
       )}
 
-      {/* sidebar */}
       <aside
         className={[
-          "fixed inset-y-0 left-0 z-50 w-64 border-r border-white/10 bg-[#0C0D0F] transition-transform duration-200",
+          "workspace-sidebar fixed inset-y-0 left-0 z-50 w-[260px] border-r border-[#263550] bg-[#101d35] transition-transform duration-200",
           open ? "translate-x-0" : "-translate-x-full",
           "md:translate-x-0",
         ].join(" ")}
       >
         <div className="flex h-full flex-col">
-          {/* Logo */}
-          <div className="flex h-16 items-center border-b border-white/10 px-6">
+          <div className="flex h-[82px] items-center border-b border-[#263550] px-5">
             <NavLink
               to="/dashboard"
               onClick={onClose}
               aria-label="SimplizerPro dashboard"
-              className="flex items-center gap-2 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+              className="flex items-center gap-3 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5476e8]/50"
             >
-              <img
-                src="/simplizerpro-logo.png"
-                alt=""
-                className="size-8 shrink-0 rounded-lg object-contain"
-              />
-              <span className="text-lg font-semibold tracking-tight">
-                SimplizerPro
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-[14px] bg-gradient-to-br from-[#345bd7] to-[#6878e8] text-white shadow-[0_5px_12px_-5px_rgba(52,91,215,0.7)]">
+                <Boxes className="size-[21px]" strokeWidth={2.1} />
+              </span>
+              <span>
+                <span className="block text-[15px] font-semibold tracking-[-0.03em] text-[#f3f6ff]">
+                  Simplizer<span className="text-[#345bd7]">Pro</span>
+                </span>
+                <span className="mt-0.5 block text-[9px] font-semibold uppercase tracking-[0.15em] text-[#8797b5]">
+                  Business workspace
+                </span>
               </span>
             </NavLink>
           </div>
 
-          {/* Navigation */}
-          <nav className="flex-1 space-y-6 p-4">
+          <nav className="flex-1 space-y-8 px-3.5 py-7">
             <NavigationSection
               title="Main"
               items={mainNavigation}
@@ -138,23 +139,26 @@ function Sidebar({ open, onClose, profile }: SidebarProps) {
             />
           </nav>
 
-          {/* User */}
-          <div className="border-t border-white/10 p-4">
-            <div className="flex items-center gap-3 rounded-lg p-2">
-              <div className="flex size-9 items-center justify-center rounded-full bg-white/10 text-sm font-medium">
+          <div className="border-t border-[#263550] p-3.5">
+            <div className="flex items-center gap-3 rounded-2xl bg-[#172642] p-3">
+              <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-[#283b67] text-sm font-semibold text-[#bfd0ff]">
                 {displayName.trim().charAt(0).toUpperCase() || "U"}
               </div>
 
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium">{displayName}</p>
-                <p className="truncate text-xs text-white/40">{roleName}</p>
+                <p className="truncate text-[12px] font-semibold text-[#edf2fc]">
+                  {displayName}
+                </p>
+                <p className="mt-0.5 truncate text-[10px] text-[#93a2be]">
+                  {roleName}
+                </p>
               </div>
             </div>
 
             <button
               type="button"
               onClick={handleLogout}
-              className="mt-2 flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-white/50 transition hover:bg-red-400/10 hover:text-red-400"
+              className="mt-1 flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-[12px] font-medium text-[#93a2be] transition hover:bg-rose-400/10 hover:text-rose-300"
             >
               <LogOut className="size-4" />
               Sign out
@@ -185,7 +189,7 @@ function NavigationSection({
 }: NavigationSectionProps) {
   return (
     <div>
-      <p className="mb-2 px-3 text-xs font-medium uppercase tracking-wider text-white/40">
+      <p className="mb-2.5 px-3 text-[9px] font-semibold uppercase tracking-[0.17em] text-[#71819e]">
         {title}
       </p>
 
@@ -200,15 +204,28 @@ function NavigationSection({
               onClick={onNavigate}
               className={({ isActive }) =>
                 [
-                  "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition",
+                  "group relative flex items-center gap-3 rounded-xl px-3 py-[11px] text-[12px] font-medium transition-colors",
                   isActive
-                    ? "bg-white text-black"
-                    : "text-white/60 hover:bg-white/5 hover:text-white",
+                    ? "bg-[#263b68] text-[#c5d3ff] shadow-[inset_0_0_0_1px_rgba(132,159,255,0.12)]"
+                    : "text-[#a0aec8] hover:bg-white/[0.045] hover:text-white",
                 ].join(" ")
               }
             >
-              <Icon className="size-4" />
-              {item.name}
+              {({ isActive }) => (
+                <>
+                  <Icon
+                    className={`size-[17px] ${
+                      isActive
+                        ? "text-[#a9bdff]"
+                        : "text-[#7889a8] transition-colors group-hover:text-[#a9bdff]"
+                    }`}
+                  />
+                  <span className="flex-1">{item.name}</span>
+                  {isActive && (
+                    <span className="absolute bottom-2.5 left-0 top-2.5 w-[3px] rounded-full bg-[#91aaff]" />
+                  )}
+                </>
+              )}
             </NavLink>
           );
         })}

@@ -56,21 +56,21 @@ const AIInsights = ({ metrics }: AIInsightsProps) => {
     };
   }, [metrics]);
   return (
-    <div className="rounded-xl border border-white/10 bg-[#0C0D0F] p-5">
+    <div className="dashboard-panel rounded-2xl border border-[#39395d] bg-gradient-to-b from-[#1b2040] to-[#121f38] p-5 sm:p-6">
       <div className="mb-6">
         <div className="flex items-center gap-2">
-          <Sparkles className="size-4 text-white/70" />
-          <h2 className="font-semibold">AI Insights</h2>
+          <Sparkles className="size-4 text-[#b7a5ff]" />
+          <h2 className="text-[15px] font-semibold">AI Insights</h2>
         </div>
 
-        <p className="mt-1 text-sm text-white/40">
-          AI-generated insights from your business data
+        <p className="mt-1 text-sm text-[#99a8c4]">
+          AI-generated signals from your business data
         </p>
       </div>
 
       {isLoading && (
         <div className="py-8 text-center">
-          <p className="text-sm text-white/40">
+          <p className="text-sm text-slate-400">
             Analyzing your business data...
           </p>
         </div>
@@ -90,17 +90,17 @@ const AIInsights = ({ metrics }: AIInsightsProps) => {
             return (
               <div
                 key={`${insight.title}-${insight.type}`}
-                className="rounded-lg border border-white/5 bg-white/2 p-4"
+                className="rounded-xl border border-white/[0.07] bg-white/[0.025] p-4"
               >
                 <div className="flex gap-3">
-                  <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-white/5">
-                    <Icon className="size-4 text-white/60" />
+                  <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#8a72e8]/[0.13]">
+                    <Icon className="size-4 text-[#b7a5ff]" />
                   </div>
 
                   <div className="min-w-0">
                     <p className="text-sm font-medium">{insight.title}</p>
 
-                    <p className="mt-1 text-sm leading-5 text-white/40">
+                    <p className="mt-1 text-sm leading-5 text-slate-400">
                       {insight.description}
                     </p>
                   </div>

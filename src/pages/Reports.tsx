@@ -6,6 +6,12 @@ import { subscribeToCustomers } from "../services/customerService";
 import { subscribeToProducts } from "../services/productService";
 import type { Customer, Order, Product } from "../types/database";
 import { FileSpreadsheet, FileText } from "lucide-react";
+import { toast } from "sonner";
+import {
+  exportReportToExcel,
+  exportReportToPDF,
+  preloadReportExportLibraries,
+} from "../services/reportExportService";
 
 type DateRange = "7" | "30" | "90" | "all";
 
@@ -19,6 +25,24 @@ function Reports() {
   const [loading, setLoading] = useState(true);
   const [dateRange, setDateRange] = useState<DateRange>("30");
   const [currentTime, setCurrentTime] = useState<number | null>(null);
+  const [exportsReady, setExportsReady] = useState(false);
+
+  useEffect(() => {
+    let isCurrent = true;
+
+    preloadReportExportLibraries()
+      .then(() => {
+        if (isCurrent) setExportsReady(true);
+      })
+      .catch((error) => {
+        console.error("Failed to prepare report exports:", error);
+        toast.error("Unable to prepare report exports");
+      });
+
+    return () => {
+      isCurrent = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (!user) return;
@@ -252,18 +276,24 @@ function Reports() {
     ],
   );
 
-  const handleExportExcel = async () => {
-    const { exportReportToExcel } =
-      await import("../services/reportExportService");
-
-    await exportReportToExcel(exportData);
+  const handleExportExcel = () => {
+    try {
+      exportReportToExcel(exportData);
+      toast.success("Excel report downloaded");
+    } catch (error) {
+      console.error("Failed to export Excel report:", error);
+      toast.error("Unable to export Excel report");
+    }
   };
 
-  const handleExportPDF = async () => {
-    const { exportReportToPDF } =
-      await import("../services/reportExportService");
-
-    await exportReportToPDF(exportData);
+  const handleExportPDF = () => {
+    try {
+      exportReportToPDF(exportData);
+      toast.success("PDF report downloaded");
+    } catch (error) {
+      console.error("Failed to export PDF report:", error);
+      toast.error("Unable to export PDF report");
+    }
   };
 
   if (loading) {
@@ -311,19 +341,21 @@ function Reports() {
           <button
             type="button"
             onClick={handleExportExcel}
-            className="inline-flex items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm font-medium text-white transition hover:bg-white/10"
+            disabled={!exportsReady}
+            className="inline-flex items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm font-medium text-white transition hover:bg-white/10 disabled:cursor-wait disabled:opacity-60"
           >
             <FileSpreadsheet className="h-4 w-4 text-emerald-400" />
-            Excel
+            {exportsReady ? "Excel" : "Preparing…"}
           </button>
 
           <button
             type="button"
             onClick={handleExportPDF}
-            className="inline-flex items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm font-medium text-white transition hover:bg-white/10"
+            disabled={!exportsReady}
+            className="inline-flex items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm font-medium text-white transition hover:bg-white/10 disabled:cursor-wait disabled:opacity-60"
           >
             <FileText className="h-4 w-4 text-red-400" />
-            PDF
+            {exportsReady ? "PDF" : "Preparing…"}
           </button>
         </div>
       </div>
