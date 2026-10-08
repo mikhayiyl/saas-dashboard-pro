@@ -67,7 +67,7 @@ function AppLayout() {
         profile={profile}
       />
 
-      <div className="min-h-screen md:ml-[260px]">
+      <div className="min-h-screen md:ml-65">
         <Navbar
           onMenuClick={() => setSidebarOpen(true)}
           profile={profile}
