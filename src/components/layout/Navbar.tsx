@@ -252,7 +252,7 @@ function Navbar({ onMenuClick, profile, theme, onToggleTheme }: NavbarProps) {
             <Bell className="size-4" />
 
             {unreadCount > 0 && (
-              <span className="absolute right-1 top-1 flex size-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-semibold text-white">
+              <span className="notification-badge absolute -right-0.5 -top-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-bold leading-none text-white ring-2 ring-[#0d1628]">
                 {unreadCount > 9 ? "9+" : unreadCount}
               </span>
             )}

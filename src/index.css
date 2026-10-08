@@ -561,6 +561,12 @@
       color: #ffffff !important;
     }
 
+    .workspace-theme[data-theme="light"] .workspace-navbar span.notification-badge {
+      background-color: #dc2626 !important;
+      color: #ffffff !important;
+      --tw-ring-color: #f7f9f9;
+    }
+
     .workspace-theme[data-theme="light"] .workspace-sidebar [class*="bg-[#283b67]"] {
       background-color: #334155 !important;
     }

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 
 import {
   Dialog,
@@ -101,9 +101,10 @@ function Orders() {
     customers.map((customer) => [customer.id, customer.email]),
   );
   const filteredOrders = orders.filter((order) => {
-    const term = search.toLowerCase();
+    const term = search.trim().replace(/^#/, "").toLowerCase();
     const searchableText = [
       order.id,
+      order.id.slice(-6),
       order.status,
       customerMap.get(order.customerId),
       customerEmailMap.get(order.customerId),
@@ -207,7 +208,7 @@ function Orders() {
             { replace: true },
           )
         }
-        placeholder="Search orders, customers, items..."
+        placeholder="Search order #, customers, items..."
         aria-label="Search orders"
         className="w-full rounded-lg border border-white/10 bg-[#0C0D0F] px-4 py-2.5 text-sm text-white outline-none transition placeholder:text-white/30 focus:border-white/20 sm:max-w-sm"
       />
@@ -240,7 +241,12 @@ function Orders() {
                 className="border-b border-white/5 last:border-0"
               >
                 <td className="px-6 py-4 font-medium text-white">
-                  #{order.id.slice(-6)}
+                  <Link
+                    to={`/orders/${order.id}`}
+                    className="underline-offset-4 transition hover:underline"
+                  >
+                    #{order.id.slice(-6)}
+                  </Link>
                 </td>
 
                 <td className="px-6 py-4 text-white/70">
